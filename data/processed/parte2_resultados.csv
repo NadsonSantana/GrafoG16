@@ -1,0 +1,11 @@
+algoritmo,resultado
+BFS,"85 árvores de busca; a partir de R61_P5: 8 vértices alcançados, profundidade máx. 1"
+DFS,85 árvores de busca (igual ao nº de componentes)
+Eulerianidade,"grafo inteiro: nao euleriano (222 vértices de grau ímpar; arestas em uma única componente: False); componentes não triviais: {'semi-euleriano': 21, 'nao euleriano': 38, 'euleriano': 5}"
+Dijkstra,origem R61_P5: 8 alcançados; mais distante R61_P3 (d = 0.8520) via R61_P5 → R61_P3
+Bellman-Ford,mesmas distâncias do Dijkstra: True; ciclo negativo: False
+Floyd-Warshall,"matriz 451×451; 1304 pares conectados; distância ponderada média 1.2790, máxima 3.7979"
+"Tarjan (CFC, dirigido)","165 componentes fortemente conexas; tamanhos {1: 101, 2: 3, 3: 5, 4: 4, 5: 23, 6: 11, 7: 12, 8: 6}"
+Tarjan (articulações/pontes),72 pontos de articulação; 112 pontes
+Kruskal,floresta com 366 arestas (= V − nº componentes = 451 − 85); peso total 272.1694
+Prim,mesma floresta em peso: True

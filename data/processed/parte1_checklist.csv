@@ -1,0 +1,14 @@
+medida,computada,observacao
+Número de vértices,Sim,
+Número de arestas,Sim,
+"Grau mínimo, máximo e médio",Sim,
+Distribuição de graus,Sim,tabela + figura
+Densidade,Sim,global e por componente
+Número de componentes conexas,Sim,
+Tamanho de cada componente,Sim,parte1_componentes.csv + figura
+Diâmetro,Sim,por componente; global = máximo
+Raio,Sim,infinito no grafo desconexo; reportado por componente
+Comprimento médio dos caminhos,Sim,sobre pares conectados
+Coeficiente de clusterização médio,Sim,
+Número de triângulos,Sim,viável: grafo pequeno
+Visualização do grafo,Sim,grafo completo (451 vértices)

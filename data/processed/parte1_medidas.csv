@@ -1,0 +1,23 @@
+medida,valor
+Número de vértices,451
+Número de arestas,548
+Grau mínimo,0
+Grau máximo,7
+Grau médio,2.4302
+Densidade (grafo inteiro),0.0054
+Densidade média por componente (>1 vértice),0.4634
+Número de componentes conexas,85
+Componentes não triviais (>1 vértice),64
+Vértices isolados,21
+Maior componente (vértices),8
+Diâmetro (máx. entre componentes),5
+Diâmetro médio (componentes não triviais),2.6719
+"Raio (grafo inteiro, desconexo)",∞
+Raio mínimo / máximo (componentes não triviais),1 / 3
+Raio médio (componentes não triviais),1.7031
+Caminho médio (pares conectados),1.6848
+Caminho médio (média das componentes),1.6322
+Coef. de clusterização médio (todos os vértices),0.3946
+Coef. de clusterização médio (grau ≥ 2),0.5476
+Transitividade global,0.3759
+Número de triângulos,161

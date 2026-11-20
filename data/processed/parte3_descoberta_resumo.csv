@@ -1,0 +1,17 @@
+medida,valor
+partidas,62.0
+partidas_com_focal_total (grau entrada = n-1),32.0
+parcela_media_focal,0.2784496833516772
+parcela_media_uniforme,0.1394201228878648
+razao_parcela_focal_uniforme,2.00719373830143
+gini_recebida_media,0.2738615896269488
+gini_emitida_media,0.02631672148404865
+wilcoxon_gini_rec>emit_p,3.788882631168001e-12
+mesmo_top_3_tercos_obs,42.0
+mesmo_top_3_tercos_esperado_acaso,1.224734977324263
+mesmo_top_3_tercos_p_permutacao,9.999000099990002e-05
+top_terco1_igual_terco3_obs,46.0
+top_terco1_igual_terco3_esperado,8.644047619047617
+spearman_terco1_terco3_mediana,0.8571428571428573
+reciprocidade_observada,0.40574162679425835
+reciprocidade_esperada_acaso (densidade),0.3641114982578397

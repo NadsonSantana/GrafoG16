@@ -1,0 +1,14 @@
+teste,ok
+BFS,True
+DFS,True
+BFS (distâncias em saltos),True
+Eulerianidade (grafo inteiro),True
+Eulerianidade (por componente),True
+Dijkstra,True
+Bellman-Ford,True
+Floyd-Warshall,True
+Tarjan (CFC),True
+Tarjan (articulações),True
+Tarjan (pontes),True
+Kruskal,True
+Prim,True
