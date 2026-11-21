@@ -1,0 +1,10 @@
+{
+  "snapshots": 426015,
+  "arestas_temporais": 2929953,
+  "arestas_temporais_laptop": 197040,
+  "pares_estaticos": 2867,
+  "pares_apos_limiar": 1241,
+  "arestas_nao_dirigidas": 951,
+  "vertices": 451,
+  "partidas": 62
+}
