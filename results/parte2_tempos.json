@@ -1,0 +1,92 @@
+{
+  "BFS": {
+    "n": 50,
+    "media": 0.0002521034001983935,
+    "desvio": 0.0002467769507284032,
+    "ic_inf": 0.00018370157624322432,
+    "ic_sup": 0.0003205052241535627,
+    "distribuicao": "Z",
+    "valor_critico": 1.959963984540054,
+    "complexidade": "O(V+E)"
+  },
+  "DFS": {
+    "n": 50,
+    "media": 0.00036896128000080353,
+    "desvio": 0.00014374487277828314,
+    "ic_inf": 0.00032911796621798743,
+    "ic_sup": 0.00040880459378361963,
+    "distribuicao": "Z",
+    "valor_critico": 1.959963984540054,
+    "complexidade": "O(V+E)"
+  },
+  "Eulerianidade": {
+    "n": 50,
+    "media": 9.412669998710044e-05,
+    "desvio": 0.00024206787091468732,
+    "ic_inf": 2.7030142376530586e-05,
+    "ic_sup": 0.0001612232575976703,
+    "distribuicao": "Z",
+    "valor_critico": 1.959963984540054,
+    "complexidade": "O(V+E)"
+  },
+  "Dijkstra (todas as fontes)": {
+    "n": 50,
+    "media": 0.004800958780069777,
+    "desvio": 0.005136097338984432,
+    "ic_inf": 0.003377331391203632,
+    "ic_sup": 0.006224586168935922,
+    "distribuicao": "Z",
+    "valor_critico": 1.959963984540054,
+    "complexidade": "O(V(V+E)\\log V)"
+  },
+  "Bellman-Ford (todas as fontes)": {
+    "n": 30,
+    "media": 0.512751105833316,
+    "desvio": 0.25558582936419577,
+    "ic_inf": 0.42129257201021364,
+    "ic_sup": 0.6042096396564183,
+    "distribuicao": "Z",
+    "valor_critico": 1.959963984540054,
+    "complexidade": "O(V^2 E)"
+  },
+  "Floyd-Warshall": {
+    "n": 10,
+    "media": 0.0953844075998859,
+    "desvio": 0.03785966889350498,
+    "ic_inf": 0.06830123199915436,
+    "ic_sup": 0.12246758320061743,
+    "distribuicao": "t",
+    "valor_critico": 2.262157162798205,
+    "complexidade": "O(V^3)"
+  },
+  "Tarjan": {
+    "n": 50,
+    "media": 0.0009209066999756033,
+    "desvio": 0.0011294563132591517,
+    "ic_inf": 0.0006078431351792541,
+    "ic_sup": 0.0012339702647719524,
+    "distribuicao": "Z",
+    "valor_critico": 1.959963984540054,
+    "complexidade": "O(V+E)"
+  },
+  "Prim": {
+    "n": 50,
+    "media": 0.0006977394000205095,
+    "desvio": 0.0005476152599519607,
+    "ic_inf": 0.0005459509834125764,
+    "ic_sup": 0.0008495278166284426,
+    "distribuicao": "Z",
+    "valor_critico": 1.959963984540054,
+    "complexidade": "O(E\\log V)"
+  },
+  "Kruskal": {
+    "n": 50,
+    "media": 0.0012942388800729532,
+    "desvio": 0.0008014713435922896,
+    "ic_inf": 0.0010720864400347073,
+    "ic_sup": 0.001516391320111199,
+    "distribuicao": "Z",
+    "valor_critico": 1.959963984540054,
+    "complexidade": "O(E\\log V)"
+  }
+}

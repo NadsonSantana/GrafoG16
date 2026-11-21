@@ -1,0 +1,39 @@
+{
+  "Observado": {
+    "arestas": 951,
+    "grau_max": 7,
+    "var_grau": 2.001563414142507,
+    "C": 0.7541442297539858,
+    "L": 1.3400696864111499,
+    "componentes": 62
+  },
+  "Erdos-Renyi": {
+    "arestas": 951.0,
+    "grau_max": 11.5,
+    "var_grau": 4.095133258931864,
+    "C": 0.007991204410273147,
+    "L": 4.395511204445635,
+    "componentes": 5.2
+  },
+  "Barabasi-Albert": {
+    "arestas": 899.0,
+    "grau_max": 58.9,
+    "var_grau": 24.590510371138784,
+    "C": 0.05128431036554375,
+    "L": 3.6908874106922887,
+    "componentes": 1.0
+  },
+  "Watts-Strogatz": {
+    "arestas": 902.0,
+    "grau_max": 6.1,
+    "var_grau": 0.36452328159645236,
+    "C": 0.37068630556435445,
+    "L": 7.496550874599654,
+    "componentes": 1.0
+  },
+  "parametros": {
+    "m_ba": 2,
+    "k_ws": 4,
+    "p_ws": 0.1
+  }
+}

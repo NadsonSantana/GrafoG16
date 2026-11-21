@@ -1,0 +1,39 @@
+{
+  "bfs_visitados": 451,
+  "dfs_visitados": 451,
+  "euler_global": {
+    "tipo": "nao_euleriano",
+    "conexo": false,
+    "vertices_grau_impar": 236
+  },
+  "euler_por_partida": {
+    "nao_euleriano": 45,
+    "caminho": 15,
+    "circuito": 2
+  },
+  "pares_alcancaveis": 2870,
+  "distancia_media": 2.1858944982578397,
+  "distancia_max": 4.809412,
+  "par_distancia_max": [
+    "g05_p3",
+    "g05_p4"
+  ],
+  "dijkstra_bf_fw_concordam": true,
+  "bellman_ford_ciclo_negativo": false,
+  "num_scc": 131,
+  "scc_tamanhos": {
+    "1": 69,
+    "3": 2,
+    "4": 4,
+    "5": 11,
+    "6": 20,
+    "7": 15,
+    "8": 10
+  },
+  "scc_nao_triviais": 62,
+  "partidas_fortemente_conexas": 19,
+  "prim_arestas": 389,
+  "prim_peso": 551.9589849999996,
+  "kruskal_arestas": 389,
+  "kruskal_peso": 551.9589849999999
+}
