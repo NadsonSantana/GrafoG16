@@ -2,6 +2,8 @@
 
 from collections import Counter
 
+import numpy as np
+
 from .algoritmos import bfs, componentes_conexas
 
 
@@ -89,6 +91,7 @@ def metricas_estruturais(g):
         "grau_min": min(gr.values()),
         "grau_max": max(gr.values()),
         "grau_medio": sum(gr.values()) / len(gr),
+        "grau_mediano": float(np.median(list(gr.values()))),
         "densidade": densidade(g),
         "num_componentes": len(comps),
         "tamanhos_componentes": tamanhos,

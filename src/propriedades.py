@@ -88,7 +88,9 @@ def small_world(g, blocos, repeticoes=30, semente=42):
     rng = random.Random(semente)
     n, m = g.num_vertices(), g.num_arestas()
     c_obs, l_obs = clusterizacao_media(g), caminhos_medios(g)
-    resultado = {"C": c_obs, "L": l_obs}
+    k_medio = 2 * m / n
+    resultado = {"C": c_obs, "L": l_obs,
+                 "teorico": {"L_rand": math.log(n) / math.log(k_medio), "C_rand": k_medio / n}}
     for nome, gerador in (("er_global", lambda: gerar_erdos_renyi(n, m, rng)),
                           ("er_blocos", lambda: gerar_er_por_blocos(g, blocos, rng))):
         cs, ls, comps = [], [], []
@@ -123,8 +125,7 @@ def lei_de_potencia(g):
     ss_tot = float(np.sum((np.log10(pk) - np.log10(pk).mean()) ** 2))
 
     lista = np.array([k for k in graus(g).values() if k > 0], dtype=float)
-    kmin = lista.min()
-    gamma_mv = 1 + len(lista) / np.sum(np.log(lista / (kmin - 0.5)))
+    mv = melhor_kmin(lista)
 
     ccdf = {int(k): float((lista >= k).mean()) for k in ks}
     media = float(lista.mean())
@@ -132,10 +133,32 @@ def lei_de_potencia(g):
     return {
         "ks": ks.tolist(), "pk": pk.tolist(), "ccdf": ccdf, "poisson": poisson,
         "gamma_mq": float(-inclinacao), "constante": float(10 ** intercepto),
-        "r2": 1 - ss_res / ss_tot if ss_tot else 0.0, "gamma_mv": float(gamma_mv),
+        "r2": 1 - ss_res / ss_tot if ss_tot else 0.0, "mv": mv,
         "k_medio": media, "variancia_k": float(lista.var()),
         "razao_kmax_kmedio": float(lista.max() / media),
     }
+
+
+def ajuste_mv(graus_lista, kmin):
+    """MV discreto aproximado (Clauset, Shalizi e Newman, 2009) na cauda k >= kmin,
+    com a distância de Kolmogorov-Smirnov entre a CCDF empírica e a do modelo."""
+    cauda = np.sort(graus_lista[graus_lista >= kmin])
+    nt = len(cauda)
+    gamma = 1 + nt / np.sum(np.log(cauda / (kmin - 0.5)))
+    valores = np.unique(cauda)
+    empirica = 1 - np.searchsorted(cauda, valores, side="left") / nt
+    modelo = ((valores - 0.5) / (kmin - 0.5)) ** (1 - gamma)
+    return {"kmin": int(kmin), "gamma": float(gamma), "ks": float(np.max(np.abs(empirica - modelo))),
+            "n_cauda": int(nt), "erro_padrao": float((gamma - 1) / math.sqrt(nt))}
+
+
+def melhor_kmin(graus_lista, cauda_minima=50, valores_minimos=3):
+    """Escolhe o kmin de menor distância KS entre os que deixam na cauda ao menos
+    cauda_minima vértices e valores_minimos graus distintos (evita caudas degeneradas)."""
+    candidatos = [ajuste_mv(graus_lista, k) for k in np.unique(graus_lista)
+                  if (graus_lista >= k).sum() >= cauda_minima
+                  and len(np.unique(graus_lista[graus_lista >= k])) >= valores_minimos]
+    return min(candidatos, key=lambda r: r["ks"])
 
 
 # ---------------------------------------------------------------- centralidade
