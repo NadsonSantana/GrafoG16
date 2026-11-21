@@ -64,14 +64,33 @@ Este trabalho apresenta uma análise estrutural do grafo \textit{comm-f2f-Resist
 \section{Introdução}
 A teoria dos grafos fornece uma linguagem comum para modelar fenômenos muito distintos, como redes sociais, redes de transporte e sistemas biológicos, revelando propriedades estruturais que não aparecem em análises tabulares convencionais. Neste trabalho analisamos uma rede social de escala humana: o olhar entre pessoas que conversam em grupo.
 
-O grafo foi determinado a partir do número de matrícula, conforme a regra da especificação. Para $M = 224215945$, a soma dos dígitos é $S = 2+2+4+2+1+5+9+4+5 = 34$ e os dois últimos dígitos formam $D = 45$. Assim,
-\begin{align*}
-  (S \times (D + 1)) \bmod 129 &= (34 \times 46) \bmod 129 \\
-                                &= 1564 \bmod 129 = 16,
-\end{align*}
-pois $1564 = 12 \times 129 + 16$. O grafo atribuído é o \textbf{G16 -- comm-f2f-Resistance}, da categoria \textit{Social networks} da coleção SNAP~\cite{snap}.
-
 O dataset~\cite{kumar2021,bai2019} contém redes dinâmicas de interação face a face extraídas de vídeos de 62 partidas de \textit{The Resistance}, um jogo em que parte dos jogadores são espiões e tentam enganar os demais. Cada partida tem de 5 a 8 participantes e dura de 16 a 60 minutos. A escolha de analisar este grafo traz um contraste interessante com as redes de grande escala usualmente estudadas: aqui a rede é pequena e fortemente particionada, o que permite calcular todas as métricas de forma exata e discutir quando conceitos como \textit{small-world} e lei de potência fazem (ou não) sentido.
+
+\section{Determinação do Grafo}
+A especificação associa a cada estudante um grafo de uma lista numerada $G_1, \dots, G_{129}$ (planilha ANALISANDO-SNAP-DATASET). Dado o número de matrícula $M$, calcula-se a soma $S$ dos seus dígitos e o número $D$ formado pelos seus dois últimos dígitos; o índice do grafo é
+\[
+  i = (S \times (D + 1)) \bmod 129,
+\]
+considerando $i = 129$ quando o resultado é 0. A Tabela~\ref{tab:matricula} aplica a regra à matrícula deste trabalho.
+
+\begin{table}[h]
+  \caption{Cálculo do grafo a partir da matrícula $M = 224215945$.}
+  \label{tab:matricula}
+  \begin{tabular}{lr}
+    \toprule
+    Passo & Valor \\
+    \midrule
+    Dígitos de $M$ & 2, 2, 4, 2, 1, 5, 9, 4, 5 \\
+    Soma dos dígitos $S$ & $2+2+4+2+1+5+9+4+5 = 34$ \\
+    Dois últimos dígitos $D$ & 45 \\
+    $S \times (D + 1)$ & $34 \times 46 = 1564$ \\
+    Divisão por 129 & $1564 = 12 \times 129 + 16$ \\
+    $i = 1564 \bmod 129$ & \textbf{16} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+Como $i = 16 \neq 0$, o grafo atribuído é o \textbf{G16 -- comm-f2f-Resistance}, da categoria \textit{Social networks} da coleção SNAP~\cite{snap}: uma rede ponderada, dirigida e temporal com 451 vértices e 3.126.993 arestas temporais. A regra foi conferida com os dois exemplos da especificação: a matrícula 225216327 resulta em $(30 \times 28) \bmod 129 = 66$ e a matrícula 2025000078, em $(24 \times 79) \bmod 129 = 90$.
 
 \section{Códigos}
 O código-fonte, o dataset tratado e as instruções de execução estão disponíveis em: \url{https://github.com/NadsonSantana/GrafoG16}. Todos os algoritmos foram implementados em Python sobre uma lista de adjacência própria; a biblioteca NetworkX foi usada apenas como oráculo nos testes automatizados e para o \textit{layout} das visualizações.
