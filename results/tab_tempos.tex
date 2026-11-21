@@ -1,0 +1,16 @@
+\begin{tabular}{llrrrc}
+  \toprule
+  Algoritmo & Complexidade & $n$ & Média (ms) & Desvio (ms) & IC 95\% (ms) \\
+  \midrule
+  BFS & $O(V+E)$ & 50 & 1,214 & 3,337 & [0,289; 2,139] \\
+  DFS & $O(V+E)$ & 50 & 1,212 & 2,535 & [0,510; 1,915] \\
+  Eulerianidade & $O(V+E)$ & 50 & 0,261 & 0,920 & [0,005; 0,516] \\
+  Dijkstra (todas as fontes) & $O(V(V+E)\log V)$ & 50 & 6,075 & 5,467 & [4,560; 7,590] \\
+  Bellman-Ford (todas as fontes) & $O(V^2 E)$ & 30 & 399,516 & 222,902 & [319,753; 479,279] \\
+  Floyd-Warshall & $O(V^3)$ & 10 & 86,398 & 25,135 & [68,417; 104,378]* \\
+  Tarjan & $O(V+E)$ & 50 & 0,725 & 0,150 & [0,684; 0,767] \\
+  Prim & $O(E\log V)$ & 50 & 0,496 & 0,109 & [0,465; 0,526] \\
+  Kruskal & $O(E\log V)$ & 50 & 0,841 & 0,127 & [0,806; 0,876] \\
+  \bottomrule
+  \multicolumn{6}{l}{\footnotesize * IC com distribuição t-Student ($n = 10$, 9 graus de liberdade); os demais, com distribuição Normal ($n \geq 30$).} \\
+\end{tabular}

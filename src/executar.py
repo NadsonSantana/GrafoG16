@@ -19,6 +19,7 @@ import numpy as np  # noqa: E402
 
 from . import algoritmos as alg  # noqa: E402
 from . import propriedades as prop  # noqa: E402
+from . import tabelas  # noqa: E402
 from .benchmark import medir  # noqa: E402
 from .grafo import Grafo  # noqa: E402
 from .metricas import metricas_estruturais  # noqa: E402
@@ -221,6 +222,76 @@ def figura_tempos(tempos):
     plt.close(fig)
 
 
+# ---------------------------------------------------------------- Parte II: escala
+
+TEORICA = {  # nome -> (rótulo LaTeX, f(V, E), usa versão dirigida)
+    "BFS": ("O(V+E)", lambda v, e: v + e, False),
+    "DFS": ("O(V+E)", lambda v, e: v + e, False),
+    "Eulerianidade": ("O(V+E)", lambda v, e: v + e, False),
+    "Dijkstra*": ("O(V(V+E)\\log V)", lambda v, e: v * (v + e) * math.log2(v), False),
+    "Bellman-Ford*": ("O(V^2E)", lambda v, e: v * v * e, False),
+    "Floyd-Warshall": ("O(V^3)", lambda v, e: v ** 3, False),
+    "Tarjan": ("O(V+E)", lambda v, e: v + e, True),
+    "Prim": ("O(E\\log V)", lambda v, e: e * math.log2(v), False),
+    "Kruskal": ("O(E\\log V)", lambda v, e: e * math.log2(v), False),
+}
+FUNCOES = {
+    "BFS": alg.bfs_completa, "DFS": alg.dfs_completa, "Eulerianidade": alg.verificar_euleriano,
+    "Dijkstra*": alg.dijkstra_todos, "Bellman-Ford*": alg.bellman_ford_todos,
+    "Floyd-Warshall": alg.floyd_warshall, "Tarjan": alg.tarjan,
+    "Prim": alg.prim, "Kruskal": alg.kruskal,
+}
+
+
+def parte2_escala(g, d, rapido=False):
+    """Complexidade observada: cada algoritmo é medido em subgrafos formados pela união
+    das k primeiras partidas (V cresce de ~60 a 451) e ajusta-se log(tempo) ~ b log f(V, E)."""
+    partidas = sorted({v.split("_")[0] for v in g.adj})
+    ks = [8, 16, 24, 32, 40, 48, 56, 62] if not rapido else [16, 62]
+    linhas = []
+    for k in ks:
+        escolhidas = set(partidas[:k])
+        vs = [v for v in g.adj if v.split("_")[0] in escolhidas]
+        sub_g, sub_d = g.subgrafo(vs), d.subgrafo(vs)
+        for nome, (_, f, dirigido) in TEORICA.items():
+            h = sub_d if dirigido else sub_g
+            n = 3 if rapido else (10 if nome in ("Bellman-Ford*", "Floyd-Warshall") else 30)
+            _, est = medir(lambda: FUNCOES[nome](h), n)
+            v_, e_ = h.num_vertices(), h.num_arestas()
+            linhas.append({"algoritmo": nome, "partidas": k, "V": v_, "E": e_,
+                           "f_teorica": f(v_, e_), **est})
+        print(f"  escala: {k} partidas ({len(vs)} vértices)")
+    ajuste = {}
+    for nome, (rotulo, _, _) in TEORICA.items():
+        pts = [x for x in linhas if x["algoritmo"] == nome]
+        x = np.log([p["f_teorica"] for p in pts])
+        y = np.log([p["media"] for p in pts])
+        b, _ = np.polyfit(x, y, 1)
+        xv = np.log([p["V"] for p in pts])
+        a, _ = np.polyfit(xv, y, 1)
+        ajuste[nome] = {"complexidade": rotulo, "expoente": float(b),
+                        "r2": float(np.corrcoef(x, y)[0, 1] ** 2),
+                        "expoente_v": float(a), "r2_v": float(np.corrcoef(xv, y)[0, 1] ** 2)}
+    salvar_json("parte2_escala.json", {"linhas": linhas, "ajuste": ajuste})
+    figura_escala(linhas)
+    return ajuste
+
+
+def figura_escala(linhas):
+    cores = [AZUL, LARANJA, AQUA, "#eda100", "#e87ba4", "#008300", "#4a3aa7", VERMELHO, TINTA_2]
+    marcadores = ["o", "s", "^", "D", "v", "P", "X", "<", ">"]
+    fig, ax = plt.subplots(figsize=(3.3, 2.8))
+    for (nome, cor, mk) in zip(TEORICA, cores, marcadores):
+        pts = [x for x in linhas if x["algoritmo"] == nome]
+        ax.loglog([p["V"] for p in pts], [p["media"] * 1000 for p in pts], marker=mk, color=cor,
+                  markersize=4, linewidth=1.5, label=nome)
+    ax.set_xlabel("vértices $V$ do subgrafo (log)")
+    ax.set_ylabel("tempo médio (ms, log)")
+    ax.legend(fontsize=6, ncol=2, loc="upper left")
+    fig.savefig(os.path.join(FIGURAS, "escala.pdf"))
+    plt.close(fig)
+
+
 # ---------------------------------------------------------------- Parte III
 
 def parte3(g, rapido=False):
@@ -328,9 +399,11 @@ def main():
     parte1(g)
     print("Parte II - algoritmos")
     parte2(g, d, rapido)
+    parte2_escala(g, d, rapido)
     print("Parte III - propriedades da rede")
     parte3(g, rapido)
-    print(f"Resultados em {RESULTADOS} e figuras em {FIGURAS}")
+    tabelas.gerar()
+    print(f"Resultados e tabelas em {RESULTADOS}; figuras em {FIGURAS}")
 
 
 if __name__ == "__main__":
