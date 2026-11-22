@@ -45,6 +45,8 @@
   \country{Brasil}
 }
 
+\email{nadson.sousa@ufba.br}
+
 \renewcommand{\shortauthors}{Sousa}
 
 \begin{abstract}
@@ -68,7 +70,10 @@ A teoria dos grafos fornece uma linguagem comum para modelar fenômenos muito di
 
 O dataset~\cite{kumar2021,bai2019} contém redes dinâmicas de interação face a face extraídas de vídeos de 62 partidas de \textit{The Resistance}, um jogo em que parte dos jogadores são espiões e tentam enganar os demais. Cada partida tem de 5 a 8 participantes e dura de 16 a 60 minutos. A escolha de analisar este grafo traz um contraste interessante com as redes de grande escala usualmente estudadas: aqui a rede é pequena e fortemente particionada, o que permite calcular todas as métricas de forma exata e discutir quando conceitos como \textit{small-world} e lei de potência fazem (ou não) sentido.
 
+O restante do texto está organizado como a especificação do trabalho. A Seção~\ref{sec:determinacao} apresenta o cálculo que determina o grafo a partir da matrícula e a Seção~\ref{sec:codigo}, o repositório com código e dados. A Seção~\ref{sec:descricao} descreve o grafo original e a Seção~\ref{sec:tratamento}, o tratamento realizado. A Seção~\ref{sec:metodologia} expõe a metodologia, e a Seção~\ref{sec:resultados} traz os resultados das Partes I, II e III, com as respostas às perguntas obrigatórias. Por fim, as Seções~\ref{sec:discussao} e~\ref{sec:conclusao} apresentam a discussão crítica e a conclusão.
+
 \section{Determinação do Grafo}
+\label{sec:determinacao}
 A especificação associa a cada estudante um grafo de uma lista numerada $G_1, \dots, G_{129}$ (planilha ANALISANDO-SNAP-DATASET). Dado o número de matrícula $M$, calcula-se a soma $S$ dos seus dígitos e o número $D$ formado pelos seus dois últimos dígitos; o índice do grafo é
 \[
   i = (S \times (D + 1)) \bmod 129,
@@ -96,12 +101,12 @@ considerando $i = 129$ quando o resultado é 0. A Tabela~\ref{tab:matricula} apl
 
 Como $i = 16 \neq 0$, o grafo atribuído é o \textbf{G16 -- comm-f2f-Resistance}, da categoria \textit{Social networks} da coleção SNAP~\cite{snap}: uma rede ponderada, dirigida e temporal com 451 vértices e 3.126.993 arestas temporais. A regra foi conferida com os dois exemplos da especificação: a matrícula 225216327 resulta em $(30 \times 28) \bmod 129 = 66$ e a matrícula 2025000078, em $(24 \times 79) \bmod 129 = 90$.
 
-\section{Códigos}
-O código-fonte, o dataset tratado e as instruções de execução estão disponíveis em: \url{https://github.com/NadsonSantana/GrafoG16}. Todos os algoritmos foram implementados em Python sobre uma lista de adjacência própria; a biblioteca NetworkX foi usada apenas como oráculo nos testes automatizados e para o \textit{layout} das visualizações. O código está organizado em módulos por etapa (tratamento, Partes I, II e III e geração das tabelas do relatório), cada um executável isoladamente.
+\section{Código e Dados}
+\label{sec:codigo}
+O código-fonte, o dataset tratado e as instruções de execução estão disponíveis em: \url{https://github.com/NadsonSantana/GrafoG16}. Todos os algoritmos foram implementados em Python sobre uma lista de adjacência própria; a biblioteca NetworkX~\cite{networkx} foi usada apenas como oráculo nos testes automatizados e para o \textit{layout} das visualizações. O código está organizado em módulos por etapa (tratamento, Partes I, II e III e geração das tabelas do relatório), cada um executável isoladamente.
 
-\section{Metodologia}
-
-\subsection{Descrição do grafo original}
+\section{Descrição do Grafo Original}
+\label{sec:descricao}
 Cada partida $g$ é distribuída como uma série temporal de matrizes de adjacência binárias: em cada instante $t$ ($1/3$ s), a variável \texttt{Pi\_TO\_Pj} vale 1 se o participante $i$ olha para $j$, e \texttt{Pi\_TO\_LAPTOP} vale 1 se $i$ olha para o próprio laptop. Cada participante olha para exatamente um alvo por instante (grau de saída 1). Há também uma versão ponderada com probabilidades. A Tabela~\ref{tab:dataset} resume o dataset.
 
 \begin{table}[h]
@@ -127,7 +132,8 @@ Cada partida $g$ é distribuída como uma série temporal de matrizes de adjacê
 
 O grafo é modelado como $G = (V, E)$, onde $V$ é o conjunto de participantes e $\{u, v\} \in E$ indica que $u$ e $v$ dedicam atenção visual significativa um ao outro.
 
-\subsection{Tratamento dos dados}
+\section{Tratamento dos Dados}
+\label{sec:tratamento}
 Os seguintes tratamentos foram aplicados, nesta ordem:
 
 \textbf{(1) Grafo temporal $\to$ grafo estático.} Para cada par ordenado $(u, v)$ de uma mesma partida, calculamos a atenção
@@ -167,7 +173,7 @@ A Tabela~\ref{tab:etapas} mostra a evolução do grafo ao longo do tratamento.
   \end{adjustbox}
 \end{table}
 
-\subsection{Visualização do grafo}
+\subsection{Visualização do grafo tratado}
 A Figura~\ref{fig:teaser} mostra o grafo completo: cada componente corresponde a uma partida. A Figura~\ref{fig:partida0} detalha a partida 0 na versão dirigida, com a espessura do arco proporcional à atenção $f(u,v)$. Nota-se a assimetria: alguns participantes concentram o olhar dos demais.
 
 \begin{figure}[h]
@@ -178,7 +184,8 @@ A Figura~\ref{fig:teaser} mostra o grafo completo: cada componente corresponde a
   \label{fig:partida0}
 \end{figure}
 
-\subsection{Abordagem para métricas e algoritmos}
+\section{Metodologia}
+\label{sec:metodologia}
 \textbf{Cálculo exato.} Com 451 vértices, nenhuma métrica exigiu amostragem: diâmetro, raio e comprimento médio foram obtidos por BFS a partir de \emph{todos} os vértices, e Floyd-Warshall foi executado no grafo inteiro.
 
 \textbf{Grafo desconexo.} Diâmetro, raio e comprimento médio só são definidos dentro de uma componente. Por isso, reportamos esses valores na maior componente conexa (LCC) e também agregados sobre todas as componentes, considerando apenas pares alcançáveis.
@@ -192,6 +199,7 @@ A Figura~\ref{fig:teaser} mostra o grafo completo: cada componente corresponde a
 \textbf{Validação.} Uma suíte de 27 testes automatizados compara cada implementação com o NetworkX em grafos aleatórios desconexos e verifica casos de resposta conhecida (caminhos, ciclos, estrelas, ciclos negativos e SCCs).
 
 \section{Resultados}
+\label{sec:resultados}
 Os resultados estão divididos em três partes: a análise estrutural obrigatória (Parte I), a aplicação dos algoritmos da disciplina (Parte II) e a análise de propriedades da rede (Parte III).
 
 \subsection{Parte I: Análise Estrutural}
@@ -225,21 +233,21 @@ A Figura~\ref{fig:graus} mostra a distribuição de graus. Ela é concentrada (g
 \subsection{Parte II: Algoritmos da Disciplina}
 Todos os algoritmos foram executados sobre o grafo completo (451 vértices e 951 arestas; 1.241 arcos na versão dirigida). Como o grafo é desconexo, as buscas foram reiniciadas a partir de cada vértice ainda não visitado, cobrindo todas as componentes, e os algoritmos de caminho mínimo de fonte única foram executados a partir de todas as fontes.
 
-\textbf{Busca em largura (BFS).} Implementada com fila (\texttt{deque}), percorre o grafo camada por camada. A varredura completa visitou os 451 vértices em 62 reinícios, confirmando as 62 componentes. Complexidade: $O(V+E)$.
+\textbf{Busca em largura (BFS).} Implementada com fila (\texttt{deque})~\cite{cormen}, percorre o grafo camada por camada. A varredura completa visitou os 451 vértices em 62 reinícios, confirmando as 62 componentes. Complexidade: $O(V+E)$.
 
 \textbf{Busca em profundidade (DFS).} Implementada com pilha explícita (iterativa). Visitou os 451 vértices. Complexidade: $O(V+E)$.
 
 \textbf{Verificação de Eulerianidade.} Um grafo não-direcionado tem circuito euleriano se é conexo (nas arestas) e todos os vértices têm grau par, e tem caminho euleriano se exatamente dois vértices têm grau ímpar. O grafo completo \textbf{não é euleriano}: é desconexo e possui 236 vértices de grau ímpar. Por partida, 2 componentes admitem circuito euleriano, 15 admitem caminho euleriano e 45 não são eulerianas. Complexidade: $O(V+E)$.
 
-\textbf{Dijkstra.} Implementado com heap binário (\texttt{heapq}) e executado a partir de cada um dos 451 vértices. Encontrou distâncias finitas para os 2.870 pares ordenados intra-partida, isto é, todos os possíveis. A distância média é 2,19 e a máxima é 4,81 (entre \texttt{g05\_p3} e \texttt{g05\_p4}, que quase não se olham). Complexidade: $O((V+E)\log V)$ por fonte.
+\textbf{Dijkstra.} Implementado com heap binário~\cite{cormen} (\texttt{heapq}) e executado a partir de cada um dos 451 vértices. Encontrou distâncias finitas para os 2.870 pares ordenados intra-partida, isto é, todos os possíveis. A distância média é 2,19 e a máxima é 4,81 (entre \texttt{g05\_p3} e \texttt{g05\_p4}, que quase não se olham). Complexidade: $O((V+E)\log V)$ por fonte.
 
 \textbf{Bellman-Ford.} Executado a partir de cada vértice, com parada antecipada quando uma rodada não relaxa nenhuma aresta. Não encontrou ciclos negativos, o que era esperado, já que $d = -\ln w > 0$. Aqui ele é aplicável, mas desnecessário: Dijkstra é preferível para pesos não-negativos. Complexidade: $O(V \cdot E)$ por fonte.
 
 \textbf{Floyd-Warshall.} Executado no grafo inteiro, gerando uma matriz $451 \times 451$. A implementação ignora $k$ intermediários com $d[i][k] = \infty$, o que, em um grafo particionado em blocos de até 8 vértices, reduz drasticamente o trabalho efetivo. As três abordagens (Dijkstra, Bellman-Ford e Floyd-Warshall) produziram distâncias \textbf{idênticas} para todos os pares. Como comparação, implementamos também uma versão vetorizada com numpy, que atualiza a matriz inteira a cada $k$. Ela produz a mesma matriz, mas levou \tempoFWnumpy{} ms, \razaoFWnumpy{} vezes \emph{mais} que a versão em Python puro: a vetorização sempre executa as $V^3 \approx 9{,}2 \times 10^7$ operações, enquanto a poda da versão pura descarta quase todos os intermediários, já que cada vértice só alcança os 4 a 7 colegas da sua partida. Complexidade: $O(V^3)$.
 
-\textbf{Tarjan.} Implementado na versão iterativa e executado sobre a versão dirigida (1.241 arcos). Encontrou 131 componentes fortemente conexas (SCCs): 62 não-triviais, exatamente uma por partida, e 69 unitárias. Em 19 partidas, todos os participantes formam uma única SCC. As SCCs unitárias revelam assimetria de atenção: 62 participantes (13,7\%) não recebem atenção acima do uniforme de nenhum colega e, portanto, não podem estar em um ciclo dirigido. Complexidade: $O(V+E)$.
+\textbf{Tarjan.} Implementado~\cite{tarjan1972} na versão iterativa e executado sobre a versão dirigida (1.241 arcos). Encontrou 131 componentes fortemente conexas (SCCs): 62 não-triviais, exatamente uma por partida, e 69 unitárias. Em 19 partidas, todos os participantes formam uma única SCC. As SCCs unitárias revelam assimetria de atenção: 62 participantes (13,7\%) não recebem atenção acima do uniforme de nenhum colega e, portanto, não podem estar em um ciclo dirigido. Complexidade: $O(V+E)$.
 
-\textbf{Tarjan: pontes e articulações.} Como complemento, aplicamos a variante de \textit{low-link} de Tarjan ao grafo não-direcionado para encontrar pontes (arestas cuja remoção desconecta a componente) e pontos de articulação (vértices com a mesma propriedade). Há apenas 3 pontes e 3 articulações, uma de cada em 3 partidas distintas: nas outras 59 partidas não existe nenhum vértice ou aresta cuja remoção isolada separe o grupo. Esse resultado antecipa a robustez discutida na Parte III. Complexidade: $O(V+E)$.
+\textbf{Tarjan: pontes e articulações.} Como complemento, aplicamos a variante de \textit{low-link} de Tarjan~\cite{tarjan1972} ao grafo não-direcionado para encontrar pontes (arestas cuja remoção desconecta a componente) e pontos de articulação (vértices com a mesma propriedade). Há apenas 3 pontes e 3 articulações, uma de cada em 3 partidas distintas: nas outras 59 partidas não existe nenhum vértice ou aresta cuja remoção isolada separe o grupo. Esse resultado antecipa a robustez discutida na Parte III. Complexidade: $O(V+E)$.
 
 \textbf{Prim e Kruskal.} Como o grafo é desconexo, ambos produzem uma \emph{floresta} geradora mínima. Prim é reiniciado em cada componente e usa heap mínimo; Kruskal usa \textit{union-find} com compressão de caminho e união por posto. Ambos encontraram 389 arestas ($V - 62$, uma árvore por partida) com o mesmo peso total, 551,96. A floresta conecta cada partida pelos pares de maior atenção mútua. Complexidade: $O(E\log V)$.
 
@@ -288,7 +296,7 @@ Um único tamanho de grafo não permite verificar como o tempo \emph{cresce}. Po
 \subsection{Parte III: Análise de Propriedades da Rede}
 
 \subsubsection{Propriedade small-world}
-Uma rede é \textit{small-world} quando $L \approx L_{rand}$ e $C \gg C_{rand}$, o que se resume pelo coeficiente $\sigma = (C/C_{rand})/(L/L_{rand})$, com $\sigma > 1$ indicando a propriedade. Implementamos o gerador $G(n,m)$ e comparamos o grafo com dois aleatórios equivalentes, cada um com 30 amostras: (i) o \textbf{global}, com mesmos $n$ e $m$; e (ii) o \textbf{por blocos}, que sorteia, dentro de cada partida, o mesmo número de arestas observado nela.
+Uma rede é \textit{small-world}~\cite{watts} quando $L \approx L_{rand}$ e $C \gg C_{rand}$, o que se resume pelo coeficiente $\sigma = (C/C_{rand})/(L/L_{rand})$, com $\sigma > 1$ indicando a propriedade~\cite{humphries2008}. Implementamos o gerador $G(n,m)$ de Erdős–Rényi~\cite{erdos1959} e comparamos o grafo com dois aleatórios equivalentes, cada um com 30 amostras: (i) o \textbf{global}, com mesmos $n$ e $m$; e (ii) o \textbf{por blocos}, que sorteia, dentro de cada partida, o mesmo número de arestas observado nela.
 
 \begin{table}[h]
   \caption{Comparação com grafos aleatórios equivalentes (média de 30 amostras).}
@@ -305,7 +313,7 @@ Contra o aleatório global, o grafo pareceria fortemente \textit{small-world} ($
 \textbf{Implicação prática.} Em uma rede \textit{small-world}, informação e influência se propagam em poucos passos. Aqui, dentro de uma mesa de jogo, qualquer olhar ou sinal pode alcançar todos em um ou dois intermediários, o que favorece a coordenação rápida (e a detecção de comportamentos suspeitos). Por outro lado, nada se propaga entre partidas.
 
 \subsubsection{Lei de potência}
-Investigamos se $P(k) \sim k^{-\gamma}$. A Figura~\ref{fig:lp} mostra a distribuição em escala log-log com o ajuste linear e a distribuição de Poisson de mesma média, além da CCDF.
+Investigamos se $P(k) \sim k^{-\gamma}$, a assinatura das redes livres de escala~\cite{barabasi}. A Figura~\ref{fig:lp} mostra a distribuição em escala log-log com o ajuste linear e a distribuição de Poisson de mesma média, além da CCDF.
 
 \begin{figure}[h]
   \centering
@@ -334,7 +342,7 @@ onde $n_c$ é o número de vértices na cauda ($k_i \geq k_{min}$). O erro padr�
 O MV confirma a conclusão. O melhor ajuste usa apenas a ``cauda'' $k \geq 5$, com três valores de grau, e produz $\hat\gamma = 5{,}88 \pm 0{,}38$ (a aproximação contínua usual daria 5,44): um decaimento muito mais abrupto que o intervalo $2 < \gamma < 3$ típico de redes livres de escala. Além disso, a distância KS de 0,13 é alta, ou seja, nem nessa cauda curta a lei de potência descreve bem os dados.
 
 \subsubsection{Robustez}
-Como o grafo é desconexo, a política adotada foi analisar o grafo completo (todas as 62 componentes), já que a LCC tem apenas 8 vértices. Removemos $r = \lfloor 0{,}05 \times 451 \rfloor = 22$ vértices em quatro cenários: remoção aleatória (30 repetições) e ataques por grau, por \textit{betweenness} e por PageRank. Nos ataques, a centralidade foi calculada uma vez, no grafo original (ranking fixo), com implementações próprias: algoritmo de Brandes para a \textit{betweenness} e iteração de potência ($\alpha = 0{,}85$) para o PageRank. O PageRank foi calculado na versão \emph{dirigida}, de modo a ranquear quem recebe mais atenção. Medimos: (A) tamanho da LCC e fração de vértices no maior pedaço conexo da própria partida; (B) número de componentes; (C) comprimento médio e eficiência global $E = \frac{1}{n(n-1)}\sum_{u\neq v} 1/d(u,v)$; e (D) fração de vértices isolados.
+Como o grafo é desconexo, a política adotada foi analisar o grafo completo (todas as 62 componentes), já que a LCC tem apenas 8 vértices. Removemos $r = \lfloor 0{,}05 \times 451 \rfloor = 22$ vértices em quatro cenários: remoção aleatória (30 repetições) e ataques por grau, por \textit{betweenness} e por PageRank. Nos ataques, a centralidade foi calculada uma vez, no grafo original (ranking fixo), com implementações próprias: algoritmo de Brandes~\cite{brandes2001} para a \textit{betweenness} e iteração de potência ($\alpha = 0{,}85$) para o PageRank~\cite{page1999}. O PageRank foi calculado na versão \emph{dirigida}, de modo a ranquear quem recebe mais atenção. Medimos: (A) tamanho da LCC e fração de vértices no maior pedaço conexo da própria partida; (B) número de componentes; (C) comprimento médio e eficiência global $E = \frac{1}{n(n-1)}\sum_{u\neq v} 1/d(u,v)$; e (D) fração de vértices isolados.
 
 \begin{table}[h]
   \caption{Métricas de robustez após a remoção de 5\% dos vértices (aleatória: média $\pm$ desvio de 30 repetições).}
@@ -354,7 +362,7 @@ Como o grafo é desconexo, a política adotada foi analisar o grafo completo (to
 
 \textbf{Remoção aleatória: robusta.} A fração no núcleo cai para 0,951, praticamente o limite trivial $1 - 22/451 = 0{,}951$: os vértices removidos saem, mas quase nenhum sobrevivente é desconectado. O número de componentes fica estável ($62{,}1$), e o comprimento médio e a eficiência não se alteram.
 
-\textbf{Ataque direcionado: também robusta.} O ataque degrada a rede mais que o acaso (até 68 componentes e 1,2\% de isolados com \textit{betweenness}), mas a diferença é pequena: a fração no núcleo cai apenas de 0,951 para 0,933. Não há um colapso como o observado em redes livres de escala. Como $k_{max} = 7$ e a clusterização é alta, não existem hubs cuja remoção fragmente a rede, e cada partida tem caminhos redundantes. Além disso, os 22 vértices mais centrais estão espalhados por 17 (grau) e 20 (\textit{betweenness}) partidas distintas, de modo que o ataque é diluído entre componentes independentes. A \textit{betweenness} foi ligeiramente mais eficaz que o grau por mirar justamente os poucos vértices-ponte dentro das partidas. O ataque por PageRank ficou entre os dois (66 componentes e 0,9\% de isolados): os participantes que mais recebem atenção não coincidem com os de maior grau (apenas 5 dos 22 vértices são comuns aos dois rankings), mas removê-los também não fragmenta as partidas.
+\textbf{Ataque direcionado: também robusta.} O ataque degrada a rede mais que o acaso (até 68 componentes e 1,2\% de isolados com \textit{betweenness}), mas a diferença é pequena: a fração no núcleo cai apenas de 0,951 para 0,933. Não há um colapso como o observado em redes livres de escala~\cite{albert2000}. Como $k_{max} = 7$ e a clusterização é alta, não existem hubs cuja remoção fragmente a rede, e cada partida tem caminhos redundantes. Além disso, os 22 vértices mais centrais estão espalhados por 17 (grau) e 20 (\textit{betweenness}) partidas distintas, de modo que o ataque é diluído entre componentes independentes. A \textit{betweenness} foi ligeiramente mais eficaz que o grau por mirar justamente os poucos vértices-ponte dentro das partidas. O ataque por PageRank ficou entre os dois (66 componentes e 0,9\% de isolados): os participantes que mais recebem atenção não coincidem com os de maior grau (apenas 5 dos 22 vértices são comuns aos dois rankings), mas removê-los também não fragmenta as partidas.
 
 \subsubsection{Descoberta mais interessante}
 A descoberta mais interessante foi que \textbf{toda a estrutura global do grafo é explicada pela partição em partidas}. Um modelo nulo que conhece apenas quantas arestas há em cada partida reproduz quase exatamente o comprimento médio ($L$: 1,34 contra 1,35), o número de componentes e \fracaoCBlocos\% da clusterização. O valor $\sigma = \sigmaGlobal$, que sugeriria uma rede \textit{small-world} exemplar, é um artefato da escolha do modelo nulo. Isso ilustra um cuidado metodológico importante: o grafo aleatório de referência precisa respeitar as restrições físicas do sistema (aqui, quem pode olhar para quem).
@@ -362,7 +370,7 @@ A descoberta mais interessante foi que \textbf{toda a estrutura global do grafo 
 A estrutura \emph{fina} está na direção das arestas: apenas 46,7\% dos arcos são recíprocos, 62 participantes (13,7\%) não recebem atenção acima do uniforme de ninguém, e o participante mais olhado de cada partida recebe em média 30\% dos arcos. Ou seja, a atenção em um jogo de dedução social é assimétrica e concentrada, justamente o tipo de padrão que os autores do dataset exploram para detectar enganadores~\cite{kumar2021}.
 
 \subsubsection{Extra: aproximação a modelos clássicos}
-Geramos, com implementações próprias, grafos Erdős–Rényi ($G(n,m)$), Barabási–Albert ($m_0 = 2$) e Watts–Strogatz ($k = 4$, $p = 0{,}1$) com $n = 451$ e número de arestas próximo de 951 (média de 10 amostras).
+Geramos, com implementações próprias, grafos Erdős–Rényi ($G(n,m)$)~\cite{erdos1959}, Barabási–Albert ($m_0 = 2$)~\cite{barabasi1999} e Watts–Strogatz~\cite{watts} ($k = 4$, $p = 0{,}1$) com $n = 451$ e número de arestas próximo de 951 (média de 10 amostras).
 
 \begin{table}[h]
   \caption{Comparação com modelos clássicos (média de 10 amostras).}
@@ -375,6 +383,7 @@ Geramos, com implementações próprias, grafos Erdős–Rényi ($G(n,m)$), Bara
 Globalmente, \textbf{nenhum dos três modelos descreve o grafo}. Barabási–Albert gera hubs ($k_{max} \approx \kmaxBA$) inexistentes aqui. Erdős–Rényi e Watts–Strogatz produzem redes conexas com caminhos longos e clusterização baixa ou moderada. Localmente, contudo, cada partida se aproxima de um \textbf{Erdős–Rényi denso} $G(n, p)$ com $p \approx 0{,}67$: o modelo por blocos reproduz $L$ e quase toda a clusterização (Tabela~\ref{tab:sw}). O modelo que melhor descreve a rede inteira é, portanto, a união disjunta de grafos aleatórios densos, um caso extremo de modelo de blocos estocástico sem arestas entre blocos.
 
 \section{Discussão Crítica}
+\label{sec:discussao}
 A análise revelou uma rede muito diferente das redes de grande escala tipicamente estudadas, e a comparação ajuda a entender o alcance de cada conceito.
 
 \textbf{Escala e exatidão.} Por ter apenas 451 vértices, o grafo permitiu calcular todas as métricas de forma exata, executar Floyd-Warshall no grafo completo e validar Dijkstra, Bellman-Ford e Floyd-Warshall entre si em todos os 2.870 pares. Em compensação, as medições de tempo ficaram na faixa de submilissegundos, onde o ruído do sistema domina e inflaciona o desvio padrão.
@@ -383,11 +392,14 @@ A análise revelou uma rede muito diferente das redes de grande escala tipicamen
 
 \textbf{Perda de informação temporal.} A agregação em um grafo estático descarta a dinâmica da conversa: quem olha para quem enquanto alguém fala, mudanças de foco ao longo das rodadas e o comportamento dos espiões em momentos-chave. Os papéis dos jogadores (espião ou não) também não estão disponíveis nos arquivos de rede, o que impediu relacionar a assimetria de atenção à enganação.
 
+\textbf{Ataques com ranking fixo.} As centralidades foram calculadas uma única vez, no grafo original. Uma remoção adaptativa, que recalcula o ranking após cada vértice removido, tende a ser mais destrutiva~\cite{albert2000} e é uma extensão natural, embora dificilmente mude a conclusão aqui: com apenas 3 articulações em todo o grafo, há poucos vértices cuja remoção isolada fragmente uma partida.
+
 \textbf{Conceitos dependentes do modelo nulo.} O caso do \textit{small-world} mostra que métricas comparativas só são informativas quando o modelo nulo é adequado. O mesmo vale para a robustez: a métrica clássica ``tamanho da LCC'' é inútil aqui (vale 8 em todos os cenários), o que motivou a métrica complementar de fração no núcleo da partida.
 
 \textbf{Desempenho dos algoritmos.} Os algoritmos $O(V+E)$ (BFS, DFS, Eulerianidade e Tarjan) foram os mais rápidos, como esperado. Kruskal foi mais lento que Prim pelo custo da ordenação global das arestas. Os expoentes ajustados ficaram próximos de 1 para os algoritmos lineares e de $O(E \log V)$, confirmando a complexidade teórica. A observação mais didática é que a estrutura do grafo altera a ordem prática dos algoritmos: Floyd-Warshall, de pior complexidade assintótica, superou Bellman-Ford a partir de todas as fontes, porque a poda de intermediários inalcançáveis explora a partição em blocos. O experimento de escala confirma esse efeito: o crescimento efetivo foi um grau de $V$ abaixo do pior caso nos algoritmos de todas as fontes e no Floyd-Warshall.
 
 \section{Conclusão}
+\label{sec:conclusao}
 Este trabalho analisou o grafo G16 (\textit{comm-f2f-Resistance}) do SNAP, determinado pela matrícula 224215945. A partir de 3,1 milhões de arestas temporais, um pipeline de tratamento (agregação temporal, remoção do laptop, limiar de atenção, simetrização e união das partidas) produziu um grafo de 451 vértices, 951 arestas e 62 componentes. As principais conclusões são:
 
 \begin{itemize}
@@ -403,7 +415,7 @@ Este trabalho analisou o grafo G16 (\textit{comm-f2f-Resistance}) do SNAP, deter
 Agradeço ao professor Bruno Pereira dos Santos pela proposta deste trabalho prático, que permitiu aplicar os conceitos da disciplina a um grafo real, e aos autores do dataset e à equipe do SNAP pela disponibilização pública dos dados.
 \end{acks}
 
-\begin{thebibliography}{9}
+\begin{thebibliography}{99}
 \bibitem{kumar2021} KUMAR, Srijan; BAI, Chongyang; SUBRAHMANIAN, V. S.; LESKOVEC, Jure. Deception Detection in Group Video Conversations using Dynamic Interaction Networks. In: \textit{International AAAI Conference on Web and Social Media (ICWSM)}, 2021.
 \bibitem{bai2019} BAI, Chongyang et al. Predicting the Visual Focus of Attention in Multi-Person Discussion Videos. In: \textit{International Joint Conference on Artificial Intelligence (IJCAI)}, 2019.
 \bibitem{snap} LESKOVEC, Jure; KREVL, Andrej. \textit{SNAP Datasets: Stanford Large Network Dataset Collection}, 2014. Disponível em: \url{https://snap.stanford.edu/data}.
@@ -411,6 +423,14 @@ Agradeço ao professor Bruno Pereira dos Santos pela proposta deste trabalho pr�
 \bibitem{barabasi} BARABÁSI, Albert-László. \textit{Network Science}. Cambridge: Cambridge University Press, 2016. Disponível em: \url{http://networksciencebook.com}.
 \bibitem{clauset2009} CLAUSET, Aaron; SHALIZI, Cosma R.; NEWMAN, Mark E. J. Power-law distributions in empirical data. \textit{SIAM Review}, v. 51, n. 4, p. 661--703, 2009.
 \bibitem{watts} WATTS, Duncan J.; STROGATZ, Steven H. Collective dynamics of `small-world' networks. \textit{Nature}, v. 393, p. 440--442, 1998.
+\bibitem{tarjan1972} TARJAN, Robert E. Depth-first search and linear graph algorithms. \textit{SIAM Journal on Computing}, v. 1, n. 2, p. 146--160, 1972.
+\bibitem{brandes2001} BRANDES, Ulrik. A faster algorithm for betweenness centrality. \textit{Journal of Mathematical Sociology}, v. 25, n. 2, p. 163--177, 2001.
+\bibitem{page1999} PAGE, Lawrence; BRIN, Sergey; MOTWANI, Rajeev; WINOGRAD, Terry. \textit{The PageRank citation ranking: bringing order to the web}. Technical Report. Stanford InfoLab, 1999.
+\bibitem{erdos1959} ERDŐS, Paul; RÉNYI, Alfréd. On random graphs I. \textit{Publicationes Mathematicae}, v. 6, p. 290--297, 1959.
+\bibitem{barabasi1999} BARABÁSI, Albert-László; ALBERT, Réka. Emergence of scaling in random networks. \textit{Science}, v. 286, n. 5439, p. 509--512, 1999.
+\bibitem{humphries2008} HUMPHRIES, Mark D.; GURNEY, Kevin. Network `small-world-ness': a quantitative method for determining canonical network equivalence. \textit{PLoS ONE}, v. 3, n. 4, e0002002, 2008.
+\bibitem{albert2000} ALBERT, Réka; JEONG, Hawoong; BARABÁSI, Albert-László. Error and attack tolerance of complex networks. \textit{Nature}, v. 406, p. 378--382, 2000.
+\bibitem{networkx} HAGBERG, Aric A.; SCHULT, Daniel A.; SWART, Pieter J. Exploring network structure, dynamics, and function using NetworkX. In: \textit{Proceedings of the 7th Python in Science Conference (SciPy)}, p. 11--15, 2008.
 \end{thebibliography}
 
 \end{document}
