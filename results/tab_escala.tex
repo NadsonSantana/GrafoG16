@@ -2,17 +2,17 @@
   \toprule
   Algoritmo & $f(V,E)$ & $V$ & $b$ & $R^2$ & $a$ & $R^2$ \\
   \midrule
-  BFS & $O(V+E)$ & 58--28.753 & 1,10 & 0,996 & 1,10 & 0,996 \\
-  DFS & $O(V+E)$ & 58--28.753 & 1,07 & 0,996 & 1,07 & 0,996 \\
-  Eulerianidade & $O(V+E)$ & 58--28.753 & 1,09 & 0,977 & 1,09 & 0,977 \\
-  Dijkstra* & $O(V(V+E)\log V)$ & 58--28.753 & 0,47 & 0,975 & 1,02 & 0,974 \\
-  Bellman-Ford* & $O(V^2E)$ & 58--905 & 0,65 & 0,991 & 1,93 & 0,991 \\
-  Floyd-Warshall & $O(V^3)$ & 58--1.807 & 0,70 & 0,990 & 2,10 & 0,990 \\
-  Floyd-Warshall (numpy) & $O(V^3)$ & 58--905 & 1,11 & 0,991 & 3,34 & 0,991 \\
-  Tarjan & $O(V+E)$ & 58--28.753 & 1,07 & 0,998 & 1,07 & 0,998 \\
-  Pontes/articulações & $O(V+E)$ & 58--28.753 & 1,11 & 0,995 & 1,10 & 0,995 \\
-  Prim & $O(E\log V)$ & 58--28.753 & 0,97 & 0,960 & 1,10 & 0,960 \\
-  Kruskal & $O(E\log V)$ & 58--28.753 & 1,00 & 0,974 & 1,15 & 0,975 \\
+  BFS & $O(V+E)$ & 58--28.753 & 1,03 & 0,998 & 1,03 & 0,998 \\
+  DFS & $O(V+E)$ & 58--28.753 & 1,02 & 0,998 & 1,01 & 0,999 \\
+  Eulerianidade & $O(V+E)$ & 58--28.753 & 1,05 & 0,994 & 1,05 & 0,994 \\
+  Dijkstra* & $O(V(V+E)\log V)$ & 58--28.753 & 0,46 & 0,999 & 0,99 & 0,999 \\
+  Bellman-Ford* & $O(V^2E)$ & 58--905 & 0,63 & 0,993 & 1,88 & 0,993 \\
+  Floyd-Warshall & $O(V^3)$ & 58--1.807 & 0,68 & 0,999 & 2,04 & 0,999 \\
+  Floyd-Warshall (numpy) & $O(V^3)$ & 58--905 & 1,02 & 0,980 & 3,07 & 0,980 \\
+  Tarjan & $O(V+E)$ & 58--28.753 & 1,03 & 0,999 & 1,02 & 0,999 \\
+  Pontes/articulações & $O(V+E)$ & 58--28.753 & 1,00 & 0,997 & 1,00 & 0,997 \\
+  Prim & $O(E\log V)$ & 58--28.753 & 0,90 & 0,997 & 1,03 & 0,997 \\
+  Kruskal & $O(E\log V)$ & 58--28.753 & 0,96 & 0,997 & 1,10 & 0,997 \\
   \bottomrule
   \multicolumn{7}{l}{\footnotesize * a partir de todas as fontes. Ajuste sobre a mediana de cada ponto. $b$: tempo $\propto f(V,E)^b$; $a$: tempo $\propto V^a$.} \\
 \end{tabular}

@@ -114,28 +114,28 @@ determinísticos (sementes fixas).
 
 | Algoritmo | Complexidade | Média (ms) | IC 95% (ms) |
 |---|---|---:|---|
-| BFS | O(V+E) | 0,31 | [0,21; 0,42] |
-| DFS | O(V+E) | 0,48 | [0,34; 0,62] |
-| Eulerianidade | O(V+E) | 0,09 | [0,06; 0,12] |
-| Dijkstra (todas as fontes) | O(V(V+E) log V) | 3,3 | [3,0; 3,5] |
-| Bellman-Ford (todas as fontes) | O(V²E) | 384 | [328; 440] |
-| Floyd-Warshall (Python, com poda) | O(V³) | 82 | [72; 93] (t-Student, n = 10) |
-| Floyd-Warshall (numpy, sem poda) | O(V³) | 350 | [246; 453] (t-Student, n = 10) |
-| Tarjan (SCC, dirigido) | O(V+E) | 0,71 | [0,69; 0,74] |
-| Tarjan (pontes e articulações) | O(V+E) | 0,78 | [0,76; 0,81] |
-| Prim | O(E log V) | 0,53 | [0,51; 0,55] |
-| Kruskal | O(E log V) | 0,89 | [0,86; 0,93] |
+| BFS | O(V+E) | 0,26 | [0,25; 0,27] |
+| DFS | O(V+E) | 0,40 | [0,40; 0,41] |
+| Eulerianidade | O(V+E) | 0,08 | [0,08; 0,08] |
+| Dijkstra (todas as fontes) | O(V(V+E) log V) | 2,8 | [2,7; 2,8] |
+| Bellman-Ford (todas as fontes) | O(V²E) | 438 | [375; 500] |
+| Floyd-Warshall (Python, com poda) | O(V³) | 108 | [83; 134] (t-Student, n = 10) |
+| Floyd-Warshall (numpy, sem poda) | O(V³) | 731 | [494; 967] (t-Student, n = 10) |
+| Tarjan (SCC, dirigido) | O(V+E) | 1,13 | [0,75; 1,52] |
+| Tarjan (pontes e articulações) | O(V+E) | 0,94 | [0,86; 1,02] |
+| Prim | O(E log V) | 0,60 | [0,57; 0,63] |
+| Kruskal | O(E log V) | 1,00 | [0,94; 1,06] |
 
 - Dijkstra, Bellman-Ford e Floyd-Warshall produzem distâncias idênticas nos 2.870 pares alcançáveis.
-- Floyd-Warshall vetorizado com numpy é ~4× **mais lento** que o puro: sem poda, faz sempre as
+- Floyd-Warshall vetorizado com numpy é ~7× **mais lento** que o puro: sem poda, faz sempre as
   V³ ≈ 9×10⁷ operações, enquanto a versão pura ignora intermediários inalcançáveis (cada vértice
   só alcança a própria partida).
 - Tarjan: 131 SCCs (uma não-trivial por partida); apenas 3 pontes e 3 articulações em todo o grafo.
 - Prim e Kruskal: floresta geradora mínima com 389 arestas (uma árvore por partida) e mesmo peso.
 - **Complexidade observada** (ajuste log-log, V de 58 a 28.753): até 62 partidas, as partidas
   reais; acima disso, réplicas de partidas sorteadas com reposição, que estendem a faixa para
-  mais de duas ordens de grandeza sem mudar o tipo de grafo. Expoente b entre 1,07 e 1,11 para
-  os algoritmos lineares e de 0,97 a 1,00 para Prim e Kruskal; Dijkstra e Bellman-Ford de todas
+  mais de duas ordens de grandeza sem mudar o tipo de grafo. Expoente b entre 1,00 e 1,05 para
+  os algoritmos lineares e de 0,90 a 0,96 para Prim e Kruskal; Dijkstra e Bellman-Ford de todas
   as fontes e Floyd-Warshall com poda crescem um grau de V abaixo do pior caso, porque cada fonte
   só alcança a própria partida. Medições com aquecimento e coletor de lixo desligado.
 
