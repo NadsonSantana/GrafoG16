@@ -319,9 +319,21 @@ def comparar_modelos(g, repeticoes=10, semente=42):
                 "C": clusterizacao_media(h), "L": caminhos_medios(h),
                 "componentes": len(componentes_conexas(h))}
 
+    def ccdf(graus_lista):
+        """P(K >= k) para cada grau k presente (graus de todas as amostras juntas)."""
+        lista = np.array(graus_lista)
+        return {int(k): float((lista >= k).mean()) for k in np.unique(lista) if k > 0}
+
     saida = {"Observado": resumo(g)}
+    ccdfs = {"Observado": ccdf(list(graus(g).values()))}
     for nome, gerar in geradores.items():
-        amostras = [resumo(gerar()) for _ in range(repeticoes)]
+        amostras, todos_graus = [], []
+        for _ in range(repeticoes):
+            h = gerar()
+            amostras.append(resumo(h))
+            todos_graus.extend(graus(h).values())
         saida[nome] = {k: float(np.mean([a[k] for a in amostras])) for k in amostras[0]}
+        ccdfs[nome] = ccdf(todos_graus)
+    saida["ccdf_graus"] = ccdfs
     saida["parametros"] = {"m_ba": m_ba, "k_ws": k_ws, "p_ws": 0.1}
     return saida

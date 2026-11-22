@@ -7,8 +7,8 @@ import os
 import networkx as nx  # usado apenas para o layout da visualização
 
 from . import algoritmos as alg
-from .comum import (AZUL, DADOS, TINTA_2, carregar, eixo_graus_log, ler_json, plt, preparar,
-                    salvar_figura, salvar_json, so_figuras)
+from .comum import (AZUL, DADOS, TINTA, TINTA_2, VERMELHO, carregar, eixo_graus_log, ler_json,
+                    plt, preparar, salvar_figura, salvar_json, so_figuras)
 from .grafo import Grafo
 from .metricas import metricas_estruturais
 
@@ -20,7 +20,38 @@ def parte1(g):
     salvar_json("parte1_metricas.json", m)
     figura_graus(m["distribuicao_graus"], g.num_vertices())
     figura_visualizacao(g)
+    figura_atencao()
     return m
+
+
+def figura_atencao():
+    """Descrição do grafo original: atenção relativa ao uniforme (f x N) de todos os pares
+    ordenados, com o limiar do tratamento, e duração das partidas."""
+    import csv
+
+    with open(os.path.join(DADOS, "atencao_pares.csv"), newline="") as f:
+        relativa = [float(l["atencao"]) * int(l["participantes"]) for l in csv.DictReader(f)]
+    with open(os.path.join(DADOS, "partidas.csv"), newline="") as f:
+        duracoes = [float(l["duracao_s"]) / 60 for l in csv.DictReader(f)]
+    mantidos = sum(1 for r in relativa if r >= 1) / len(relativa)
+
+    fig, (a, b) = plt.subplots(1, 2, figsize=(6.4, 2.4), gridspec_kw={"width_ratios": [1.6, 1]})
+    a.hist(relativa, bins=40, color=AZUL, edgecolor="white", linewidth=0.5)
+    a.axvline(1, color=VERMELHO, linewidth=1.5)
+    topo = a.get_ylim()[1]
+    a.text(1.05, topo * 0.92, f"limiar $f = 1/N$\n{mantidos:.0%} dos pares mantidos",
+           color=TINTA, fontsize=7, va="top")
+    a.set_xlabel("atenção relativa ao uniforme, $f(u,v) \\cdot N$")
+    a.set_ylabel("pares ordenados")
+    a.set_title("Atenção entre participantes (2.870 pares)", fontsize=9)
+    a.grid(axis="x", visible=False)
+    b.hist(duracoes, bins=12, color=AZUL, edgecolor="white", linewidth=0.5)
+    b.set_xlabel("duração (min)")
+    b.set_ylabel("partidas")
+    b.set_title("Duração das 62 partidas", fontsize=9)
+    b.grid(axis="x", visible=False)
+    fig.tight_layout()
+    salvar_figura(fig, "atencao")
 
 
 def figura_graus(dist, n):
@@ -88,6 +119,7 @@ def figuras(g):
     m = ler_json("parte1_metricas.json")
     figura_graus({int(k): v for k, v in m["distribuicao_graus"].items()}, m["vertices"])
     figura_visualizacao(g)
+    figura_atencao()
 
 
 def main():

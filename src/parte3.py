@@ -25,6 +25,7 @@ def parte3(g, d, rapido=False):
     salvar_json("parte3_modelos.json", modelos)
     figura_lei_potencia(lp)
     figura_robustez(rob)
+    figura_modelos(modelos["ccdf_graus"])
     return sw, lp, rob, modelos
 
 
@@ -72,6 +73,23 @@ def figura_lei_potencia(lp):
     salvar_figura(fig, "lei_potencia")
 
 
+def figura_modelos(ccdfs):
+    """CCDF dos graus do grafo observado contra os modelos clássicos (amostras agregadas)."""
+    estilos = {"Observado": (AZUL, "o", "observado (G16)"),
+               "Erdos-Renyi": (LARANJA, "s", "Erdős–Rényi $G(n,m)$"),
+               "Barabasi-Albert": (AQUA, "^", "Barabási–Albert ($m_0 = 2$)"),
+               "Watts-Strogatz": (VERMELHO, "D", "Watts–Strogatz ($p = 0{,}1$)")}
+    fig, ax = plt.subplots(figsize=(3.3, 2.6))
+    for nome, (cor, marcador, rotulo) in estilos.items():
+        pontos = sorted((int(k), v) for k, v in ccdfs[nome].items())
+        ax.loglog([k for k, _ in pontos], [v for _, v in pontos], marker=marcador, color=cor,
+                  markersize=3.5, linewidth=1.5 if nome == "Observado" else 1, label=rotulo)
+    ax.set_xlabel("grau $k$ (log)")
+    ax.set_ylabel("$P(K \\geq k)$ (log)")
+    ax.legend(fontsize=6, loc="lower left")
+    salvar_figura(fig, "modelos_ccdf")
+
+
 def figura_robustez(rob):
     metricas = [("A_partidas", "A: fração no núcleo\nda partida"), ("B_componentes", "B: nº de\ncomponentes"),
                 ("C_eficiencia", "C: eficiência\nglobal"), ("D_isolados", "D: fração de\nisolados")]
@@ -110,6 +128,7 @@ def figuras():
     """Redesenha as figuras da Parte III a partir dos JSONs de results/."""
     figura_lei_potencia(ler_json("parte3_lei_potencia.json"))
     figura_robustez(ler_json("parte3_robustez.json"))
+    figura_modelos(ler_json("parte3_modelos.json")["ccdf_graus"])
 
 
 def main():
