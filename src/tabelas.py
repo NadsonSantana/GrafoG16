@@ -67,33 +67,31 @@ def tab_metricas():
     m = ler("parte1_metricas.json")
     sw = ler("parte3_small_world.json")["por_partida"]
     tam = m["tamanhos_componentes_freq"]
-    exato = "exato"
+    tamanhos = "; ".join(f"{t}: {n}" for t, n in sorted(tam.items(), key=lambda x: -int(x[0])))
+    bfs = "BFS de todos os vértices"
     linhas = [
-        ("Número de vértices", num(m["vertices"]), exato),
-        ("Número de arestas", num(m["arestas"]), exato),
-        ("Grau mín. / máx.", f"{m['grau_min']} / {m['grau_max']}", exato),
-        ("Grau médio / mediano", f"{num(m['grau_medio'])} / {num(m['grau_mediano'], 0)}", exato),
-        ("Distribuição de graus", "Fig.~\\ref{fig:graus}", "exato (todos os vértices)"),
-        ("Densidade global", cientifico(m["densidade"]), exato),
+        ("Número de vértices", num(m["vertices"]), "exato"),
+        ("Número de arestas", num(m["arestas"]), "exato"),
+        ("Grau mín. / máx.", f"{m['grau_min']} / {m['grau_max']}", "exato"),
+        ("Grau médio / mediano", f"{num(m['grau_medio'])} / {num(m['grau_mediano'], 0)}", "exato"),
+        ("Distribuição de graus", "Fig.~\\ref{fig:graus}", "exato"),
+        ("Densidade global", cientifico(m["densidade"]), "exato"),
         ("Densidade média intra-partida", num(sw["densidade_media"]), "média das 62 partidas"),
         ("Número de componentes", num(m["num_componentes"]), "BFS"),
-        ("Tamanho das componentes", f"{min(map(int, tam))} a {max(map(int, tam))}",
-         "BFS (distribuição no texto)"),
+        ("Tamanho de cada componente", tamanhos, "BFS (tamanho: nº de partidas)"),
         ("Tamanho da LCC", num(m["tamanho_lcc"]), "BFS"),
-        ("Diâmetro (LCC / máx.)", f"{m['diametro_lcc']} / {m['diametro_max_componentes']}",
-         "BFS de todos os vértices"),
-        ("Raio (LCC / mín.)", f"{m['raio_lcc']} / {m['raio_min_componentes']}",
-         "BFS de todos os vértices"),
+        ("Diâmetro (LCC / máx.)", f"{m['diametro_lcc']} / {m['diametro_max_componentes']}", bfs),
+        ("Raio (LCC / mín.)", f"{m['raio_lcc']} / {m['raio_min_componentes']}", bfs),
         ("Comp. médio (LCC / global)",
-         f"{num(m['caminho_medio_lcc'])} / {num(m['caminho_medio_global'])}",
-         "BFS de todos os vértices"),
+         f"{num(m['caminho_medio_lcc'])} / {num(m['caminho_medio_global'])}", bfs),
         ("Clusterização média", num(m["clusterizacao_media"]), "exato (vizinhanças)"),
         ("Número de triângulos", num(m["triangulos"]), "exato (vizinhanças)"),
         ("Transitividade global", num(m["transitividade"]), "$3T$ / triplas conexas"),
         ("Visualização", "Fig.~\\ref{fig:teaser}, \\ref{fig:partida0}", "grafo completo"),
     ]
-    salvar("tab_metricas.tex", tabular("llp{0.30\\columnwidth}",
-                                       ["Métrica", "Valor", "Método"], linhas))
+    linhas = [(nome, valor, "Sim", metodo) for nome, valor, metodo in linhas]
+    salvar("tab_metricas.tex", tabular("llcl",
+                                       ["Métrica", "Valor", "Computada?", "Método"], linhas))
 
 
 def tab_tempos():
@@ -203,7 +201,8 @@ def valores():
     t = ler("parte2_tempos.json")
     a = ler("parte2_escala.json")["ajuste"]
     ms = {k: v["media"] * 1000 for k, v in t.items()}
-    lineares = ["BFS", "DFS", "Eulerianidade", "Tarjan", "Prim", "Kruskal"]
+    lineares = ["BFS", "DFS", "Eulerianidade", "Tarjan", "Tarjan (pontes e articulações)", "Prim",
+                "Kruskal"]
     macros = {
         "tempoMaxLinear": num(max(ms[k] for k in lineares), 1),
         "tempoBF": num(ms["Bellman-Ford (todas as fontes)"], 1),

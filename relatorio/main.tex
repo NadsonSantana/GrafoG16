@@ -50,7 +50,7 @@
 \renewcommand{\shortauthors}{Sousa}
 
 \begin{abstract}
-Este trabalho apresenta uma análise estrutural do grafo \textit{comm-f2f-Resistance}, do repositório SNAP, que registra quem olha para quem, a cada $1/3$ de segundo, durante 62 partidas do jogo de dedução social \textit{The Resistance}. O grafo original é temporal, dirigido e ponderado, com mais de 3,1 milhões de arestas temporais. Aplicamos a conversão para um grafo estático por meio da fração de tempo de atenção entre participantes, um limiar de atenção acima do uniforme, a conversão para grafo não-direcionado e a união das 62 partidas, resultando em um grafo de 451 vértices, 951 arestas e 62 componentes. Calculamos todas as métricas estruturais de forma exata, implementamos os algoritmos clássicos da disciplina e investigamos as propriedades \textit{small-world}, lei de potência e robustez. Os resultados mostram uma rede formada por pequenos grupos densos ($\bar{C}=0{,}75$), sem hubs e sem lei de potência, cuja aparente propriedade \textit{small-world} é inteiramente explicada pela partição em partidas.
+Este trabalho apresenta uma análise estrutural do grafo \textit{comm-f2f-Resistance}, do repositório SNAP, que registra quem olha para quem, a cada $1/3$ de segundo, durante 62 partidas do jogo de dedução social \textit{The Resistance}. O grafo original é temporal, dirigido e ponderado, com mais de 3,1 milhões de arestas temporais. Aplicamos a conversão para um grafo estático por meio da fração de tempo de atenção entre participantes, um limiar de atenção acima do uniforme, a conversão para grafo não-direcionado e a união das 62 partidas, resultando em um grafo de 451 vértices, 951 arestas e 62 componentes. Calculamos todas as métricas estruturais de forma exata, implementamos os algoritmos clássicos da disciplina e investigamos as propriedades \textit{small-world}, lei de potência e robustez. Os resultados mostram uma rede formada por pequenos grupos densos ($\bar{C}=0{,}75$), sem hubs e sem lei de potência, cuja aparente propriedade \textit{small-world} é inteiramente explicada pela partição em partidas. Código, dados tratados e instruções de execução: \textbf{\url{https://github.com/NadsonSantana/GrafoG16}}.
 \end{abstract}
 
 \keywords{redes de interação face a face, SNAP, análise estrutural, algoritmos de grafos, small-world, robustez}
@@ -103,7 +103,11 @@ Como $i = 16 \neq 0$, o grafo atribuído é o \textbf{G16 -- comm-f2f-Resistance
 
 \section{Código e Dados}
 \label{sec:codigo}
-O código-fonte, o dataset tratado e as instruções de execução estão disponíveis em: \url{https://github.com/NadsonSantana/GrafoG16}. Todos os algoritmos foram implementados em Python sobre uma lista de adjacência própria; a biblioteca NetworkX~\cite{networkx} foi usada apenas como oráculo nos testes automatizados e para o \textit{layout} das visualizações. O código está organizado em módulos por etapa (tratamento, Partes I, II e III e geração das tabelas do relatório), cada um executável isoladamente.
+O código-fonte, o dataset tratado e as instruções de execução estão disponíveis em:
+\begin{center}
+  \textbf{\url{https://github.com/NadsonSantana/GrafoG16}}
+\end{center}
+ Todos os algoritmos foram implementados em Python sobre uma lista de adjacência própria; a biblioteca NetworkX~\cite{networkx} foi usada apenas como oráculo nos testes automatizados e para o \textit{layout} das visualizações. O código está organizado em módulos por etapa (tratamento, Partes I, II e III e geração das tabelas do relatório), cada um executável isoladamente.
 
 \section{Descrição do Grafo Original}
 \label{sec:descricao}
@@ -163,7 +167,7 @@ for i in range(n):
             arestas.append((u(i), u(j), w, -math.log(w)))
 \end{lstlisting}
 
-A Tabela~\ref{tab:etapas} mostra a evolução do grafo ao longo do tratamento.
+A Tabela~\ref{tab:etapas} mostra a evolução do grafo ao longo do tratamento. O número de vértices não muda: nenhum participante fica isolado após o limiar. A grande redução ocorre na agregação temporal, de quase 3 milhões de registros para 2.867 pares; o limiar mantém 43\% desses pares, e a simetrização reduz os 1.241 arcos a 951 arestas, pois 46,7\% dos arcos são recíprocos.
 
 \begin{table}[h]
   \caption{Evolução do grafo ao longo dos tratamentos aplicados.}
@@ -196,7 +200,7 @@ A Figura~\ref{fig:teaser} mostra o grafo completo: cada componente corresponde a
 
 \textbf{Análise temporal.} Cada algoritmo foi executado $n$ vezes, após uma execução de aquecimento. O intervalo de confiança de 95\% da média é $\bar{x} \pm c \cdot s/\sqrt{n}$, com $c = z_{\alpha/2} = 1{,}96$ (Normal) para $n \geq 30$ e $c = t_{\alpha/2,\,n-1}$ (t-Student) para $n < 30$. Usamos $n = 50$ para os algoritmos rápidos, $n = 30$ para Bellman-Ford e $n = 10$ para Floyd-Warshall ($t_{0{,}025;9} = 2{,}262$).
 
-\textbf{Validação.} Uma suíte de 27 testes automatizados compara cada implementação com o NetworkX em grafos aleatórios desconexos e verifica casos de resposta conhecida (caminhos, ciclos, estrelas, ciclos negativos e SCCs).
+\textbf{Validação.} Uma suíte de 64 testes automatizados compara cada implementação com o NetworkX em grafos aleatórios desconexos, verifica casos de resposta conhecida (caminhos, ciclos, estrelas, ciclos negativos e SCCs), testa o tratamento em uma partida sintética e confere os dados tratados com as estatísticas publicadas no SNAP.
 
 \section{Resultados}
 \label{sec:resultados}
@@ -205,13 +209,11 @@ Os resultados estão divididos em três partes: a análise estrutural obrigatór
 \subsection{Parte I: Análise Estrutural}
 A Tabela~\ref{tab:metricas} apresenta as métricas estruturais do grafo tratado. Todas foram computadas, e de forma exata.
 
-\begin{table}[h]
+\begin{table*}[t]
   \caption{Métricas estruturais do grafo tratado e método de cálculo. Todas foram computadas; nenhuma por amostragem.}
   \label{tab:metricas}
-  \begin{adjustbox}{max width=\columnwidth}
   \input{../results/tab_metricas.tex}
-  \end{adjustbox}
-\end{table}
+\end{table*}
 
 \textbf{Densidade e componentes.} A densidade global de $9{,}37 \times 10^{-3}$ sugere um grafo esparso, mas é enganosa: ela é baixa apenas porque não existem arestas entre partidas. Dentro de cada partida, a densidade média é 0,67, ou seja, cada participante presta atenção significativa a dois terços dos colegas. As 62 componentes têm 8 (29 partidas), 7 (23), 6 (8) ou 5 vértices (2) e coincidem exatamente com as partidas: nenhuma partida foi fragmentada pelo limiar, e não há vértices isolados.
 
@@ -396,7 +398,7 @@ A análise revelou uma rede muito diferente das redes de grande escala tipicamen
 
 \textbf{Conceitos dependentes do modelo nulo.} O caso do \textit{small-world} mostra que métricas comparativas só são informativas quando o modelo nulo é adequado. O mesmo vale para a robustez: a métrica clássica ``tamanho da LCC'' é inútil aqui (vale 8 em todos os cenários), o que motivou a métrica complementar de fração no núcleo da partida.
 
-\textbf{Desempenho dos algoritmos.} Os algoritmos $O(V+E)$ (BFS, DFS, Eulerianidade e Tarjan) foram os mais rápidos, como esperado. Kruskal foi mais lento que Prim pelo custo da ordenação global das arestas. Os expoentes ajustados ficaram próximos de 1 para os algoritmos lineares e de $O(E \log V)$, confirmando a complexidade teórica. A observação mais didática é que a estrutura do grafo altera a ordem prática dos algoritmos: Floyd-Warshall, de pior complexidade assintótica, superou Bellman-Ford a partir de todas as fontes, porque a poda de intermediários inalcançáveis explora a partição em blocos. O experimento de escala confirma esse efeito: o crescimento efetivo foi um grau de $V$ abaixo do pior caso nos algoritmos de todas as fontes e no Floyd-Warshall.
+\textbf{Desempenho dos algoritmos.} Os algoritmos lineares e os de árvore geradora levaram no máximo \tempoMaxLinear{} ms no grafo completo; nessa faixa de submilissegundos, a ordem entre eles muda de uma execução para outra e não deve ser interpretada. Kruskal tende a ser mais lento que Prim pelo custo da ordenação global das arestas. Os expoentes ajustados ficaram próximos de 1 para os algoritmos lineares e de $O(E \log V)$, confirmando a complexidade teórica. A observação mais didática é que a estrutura do grafo altera a ordem prática dos algoritmos: Floyd-Warshall, de pior complexidade assintótica, superou Bellman-Ford a partir de todas as fontes, porque a poda de intermediários inalcançáveis explora a partição em blocos. O experimento de escala confirma esse efeito: o crescimento efetivo foi um grau de $V$ abaixo do pior caso nos algoritmos de todas as fontes e no Floyd-Warshall.
 
 \section{Conclusão}
 \label{sec:conclusao}
