@@ -280,14 +280,18 @@ def parte2_escala(g, d, rapido=False):
 def figura_escala(linhas):
     cores = [AZUL, LARANJA, AQUA, "#eda100", "#e87ba4", "#008300", "#4a3aa7", VERMELHO, TINTA_2]
     marcadores = ["o", "s", "^", "D", "v", "P", "X", "<", ">"]
-    fig, ax = plt.subplots(figsize=(3.3, 2.8))
+    fig, ax = plt.subplots(figsize=(3.3, 3.4))
     for (nome, cor, mk) in zip(TEORICA, cores, marcadores):
         pts = [x for x in linhas if x["algoritmo"] == nome]
         ax.loglog([p["V"] for p in pts], [p["media"] * 1000 for p in pts], marker=mk, color=cor,
                   markersize=4, linewidth=1.5, label=nome)
+    vs = sorted({p["V"] for p in linhas})
+    marcas = [vs[0], vs[1], vs[3], vs[-1]]  # aproximadamente equidistantes em log
+    ax.set_xticks(marcas, [str(v) for v in marcas])
+    ax.xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
     ax.set_xlabel("vértices $V$ do subgrafo (log)")
     ax.set_ylabel("tempo médio (ms, log)")
-    ax.legend(fontsize=6, ncol=2, loc="upper left")
+    ax.legend(fontsize=6, ncol=3, loc="upper center", bbox_to_anchor=(0.5, -0.2))
     fig.savefig(os.path.join(FIGURAS, "escala.pdf"))
     plt.close(fig)
 

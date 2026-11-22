@@ -147,7 +147,8 @@ def tab_potencia():
         ("Regressão log-log: $R^2$", num(lp["r2"], 2)),
         ("MV: $k_{min}$ (mínima distância KS)", mv["kmin"]),
         ("MV: $\\gamma \\pm$ erro padrão", f"{num(mv['gamma'], 2)} $\\pm$ {num(mv['erro_padrao'], 2)}"),
-        ("MV: vértices na cauda", f"{mv['n_cauda']} (3 valores de $k$)"),
+        ("MV: vértices na cauda",
+         f"{mv['n_cauda']} ({sum(1 for k in lp['ks'] if k >= mv['kmin'])} valores de $k$)"),
         ("MV: distância KS", num(mv["ks"], 3)),
         ("$\\langle k \\rangle$ / Var($k$)", f"{num(lp['k_medio'], 2)} / {num(lp['variancia_k'], 2)}"),
         ("$k_{max} / \\langle k \\rangle$", num(lp["razao_kmax_kmedio"], 2)),
@@ -215,6 +216,16 @@ def valores():
         "expKruskal": num(a["Kruskal"]["expoente"], 2),
         "expEuler": num(a["Eulerianidade"]["expoente"], 2),
     }
+    sw = ler("parte3_small_world.json")["global"]
+    modelos = ler("parte3_modelos.json")
+    macros.update({
+        "sigmaGlobal": num(sw["er_global"]["sigma"], 0),
+        "sigmaBlocos": num(sw["er_blocos"]["sigma"], 2),
+        "excessoC": num((sw["er_blocos"]["gamma"] - 1) * 100, 0),
+        "fracaoCBlocos": num(sw["er_blocos"]["C_rand"] / sw["C"] * 100, 0),
+        "LBlocos": num(sw["er_blocos"]["L_rand"], 2),
+        "kmaxBA": num(modelos["Barabasi-Albert"]["grau_max"], 0),
+    })
     salvar("valores.tex", "".join(f"\\newcommand{{\\{k}}}{{{v}}}\n" for k, v in macros.items()))
 
 
