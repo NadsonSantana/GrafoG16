@@ -28,13 +28,17 @@ data/processed/        dados tratados (CSV) usados nas análises
 src/
   tratamento.py        dados brutos -> grafo estático tratado
   grafo.py             lista de adjacência
-  algoritmos.py        BFS, DFS, Eulerianidade, Dijkstra, Bellman-Ford,
-                       Floyd-Warshall, Tarjan, Prim, Kruskal
-  metricas.py          métricas estruturais (Parte I)
-  propriedades.py      small-world, lei de potência, robustez e modelos (Parte III)
+  algoritmos.py        BFS, DFS, Eulerianidade, Dijkstra, Bellman-Ford, Floyd-Warshall,
+                       Tarjan (SCC e pontes/articulações), Prim, Kruskal
+  metricas.py          métricas estruturais
+  propriedades.py      small-world, lei de potência, centralidades, robustez e modelos
   benchmark.py         tempo real: média, desvio e IC 95% (Z ou t-Student)
-  executar.py          executa todas as análises (inclui o experimento de escala da Parte II)
-  tabelas.py           gera as tabelas LaTeX e macros do relatório a partir dos JSONs
+  comum.py             caminhos, estilo dos gráficos e carga do grafo tratado
+  parte1.py            Parte I  (python -m src.parte1)
+  parte2.py            Parte II (python -m src.parte2), inclui o experimento de escala
+  parte3.py            Parte III (python -m src.parte3)
+  tabelas.py           tabelas LaTeX e macros do relatório a partir dos JSONs
+  executar.py          executa as três partes e gera as tabelas
 tests/                 testes (NetworkX usado apenas como oráculo)
 results/               resultados em JSON, tabelas tab_*.tex e macros valores.tex
 figures/               figuras do relatório
@@ -64,6 +68,7 @@ python3 -m venv .venv
 .venv/bin/python -m src.tratamento   # regenera data/processed/
 .venv/bin/python -m pytest           # testes
 .venv/bin/python -m src.executar     # análises completas (~1 min); --rapido para teste
+.venv/bin/python -m src.parte2       # ou apenas uma parte (parte1, parte2, parte3)
 .venv/bin/python -m src.tabelas      # só regenera as tabelas do relatório a partir dos JSONs
 ```
 
@@ -77,6 +82,21 @@ Para compilar o relatório:
 ```bash
 cd relatorio && pdflatex main.tex && pdflatex main.tex
 ```
+
+## Onde mexer
+
+| Quero alterar... | Arquivo |
+|---|---|
+| leitura dos dados brutos, limiar de atenção, pesos | `src/tratamento.py` |
+| estrutura de grafo (lista de adjacência) | `src/grafo.py` |
+| um algoritmo da Parte II | `src/algoritmos.py` |
+| repetições, tamanhos do experimento de escala | `src/parte2.py` (`parte2`, `parte2_escala`) |
+| uma métrica da Parte I | `src/metricas.py` |
+| small-world, lei de potência, centralidades, robustez, modelos | `src/propriedades.py` |
+| cálculo do IC 95% | `src/benchmark.py` |
+| aparência de uma figura | função `figura_*` da respectiva `src/parteN.py`; cores em `src/comum.py` |
+| formato de uma tabela ou valor citado no relatório | `src/tabelas.py` |
+| texto do relatório | `relatorio/main.tex` |
 
 ## Referências
 
