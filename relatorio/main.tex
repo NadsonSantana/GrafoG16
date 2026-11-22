@@ -209,7 +209,7 @@ A Tabela~\ref{tab:metricas} apresenta as métricas estruturais do grafo tratado.
 
 \textbf{Distâncias.} O diâmetro máximo entre as componentes é 3, e o da LCC é 2. O comprimento médio dos caminhos é 1,34: a maioria dos pares está ligada diretamente, e os demais por um único intermediário.
 
-\textbf{Clusterização e triângulos.} O coeficiente médio de 0,754, com 791 triângulos, indica forte fechamento triádico: se $A$ dá atenção a $B$ e a $C$, é muito provável que $B$ e $C$ também se olhem. Isso é esperado em uma conversa em grupo, cujo foco de atenção se desloca entre poucos falantes.
+\textbf{Clusterização e triângulos.} O coeficiente médio de 0,754, com 791 triângulos, indica forte fechamento triádico: se $A$ dá atenção a $B$ e a $C$, é muito provável que $B$ e $C$ também se olhem. Isso é esperado em uma conversa em grupo, cujo foco de atenção se desloca entre poucos falantes. A transitividade global, $3T$ dividido pelo número de triplas conexas, vale 0,676. Ela é menor que a clusterização média porque pondera mais os vértices de grau alto, cujas vizinhanças são proporcionalmente menos fechadas.
 
 \subsubsection{Distribuição de graus}
 A Figura~\ref{fig:graus} mostra a distribuição de graus. Ela é concentrada (graus 3 e 4 somam 50\% dos vértices), limitada superiormente por 7 (o máximo possível em uma partida de 8 pessoas) e não apresenta cauda. Na escala log-log, os pontos formam uma curva côncava, e não uma reta.
@@ -235,7 +235,7 @@ Todos os algoritmos foram executados sobre o grafo completo (451 vértices e 951
 
 \textbf{Bellman-Ford.} Executado a partir de cada vértice, com parada antecipada quando uma rodada não relaxa nenhuma aresta. Não encontrou ciclos negativos, o que era esperado, já que $d = -\ln w > 0$. Aqui ele é aplicável, mas desnecessário: Dijkstra é preferível para pesos não-negativos. Complexidade: $O(V \cdot E)$ por fonte.
 
-\textbf{Floyd-Warshall.} Executado no grafo inteiro, gerando uma matriz $451 \times 451$. A implementação ignora $k$ intermediários com $d[i][k] = \infty$, o que, em um grafo particionado em blocos de até 8 vértices, reduz drasticamente o trabalho efetivo. As três abordagens (Dijkstra, Bellman-Ford e Floyd-Warshall) produziram distâncias \textbf{idênticas} para todos os pares. Complexidade: $O(V^3)$.
+\textbf{Floyd-Warshall.} Executado no grafo inteiro, gerando uma matriz $451 \times 451$. A implementação ignora $k$ intermediários com $d[i][k] = \infty$, o que, em um grafo particionado em blocos de até 8 vértices, reduz drasticamente o trabalho efetivo. As três abordagens (Dijkstra, Bellman-Ford e Floyd-Warshall) produziram distâncias \textbf{idênticas} para todos os pares. Como comparação, implementamos também uma versão vetorizada com numpy, que atualiza a matriz inteira a cada $k$. Ela produz a mesma matriz, mas levou \tempoFWnumpy{} ms, \razaoFWnumpy{} vezes \emph{mais} que a versão em Python puro: a vetorização sempre executa as $V^3 \approx 9{,}2 \times 10^7$ operações, enquanto a poda da versão pura descarta quase todos os intermediários, já que cada vértice só alcança os 4 a 7 colegas da sua partida. Complexidade: $O(V^3)$.
 
 \textbf{Tarjan.} Implementado na versão iterativa e executado sobre a versão dirigida (1.241 arcos). Encontrou 131 componentes fortemente conexas (SCCs): 62 não-triviais, exatamente uma por partida, e 69 unitárias. Em 19 partidas, todos os participantes formam uma única SCC. As SCCs unitárias revelam assimetria de atenção: 62 participantes (13,7\%) não recebem atenção acima do uniforme de nenhum colega e, portanto, não podem estar em um ciclo dirigido. Complexidade: $O(V+E)$.
 
@@ -283,7 +283,7 @@ Um único tamanho de grafo não permite verificar como o tempo \emph{cresce}. Po
 
 \textbf{Lineares.} BFS, DFS e Tarjan apresentam $b$ entre \expMinLinear{} e \expMaxLinear{}, compatível com $O(V+E)$; Prim e Kruskal ficam em \expPrim{} e \expKruskal{}, compatível com $O(E\log V)$, já que o fator $\log V$ varia pouco nessa faixa. A verificação de Eulerianidade ($b = \expEuler$) tem custo tão pequeno que o ruído de medição pesa mais no seu ajuste.
 
-\textbf{Todas as fontes e Floyd-Warshall.} Aqui o expoente $b$ fica bem abaixo de 1, e a explicação está na estrutura do grafo. Como cada partida é uma componente com no máximo 8 vértices, um Dijkstra a partir de uma fonte só explora a sua partida: o custo de todas as fontes cresce de forma próxima da linear em $V$ ($a = \expVDijkstra$), e não quadraticamente. Bellman-Ford percorre a lista global de arcos por poucas rodadas para cada fonte, o que dá custo $\approx V \cdot E \propto V^2$ ($a = \expVBF$), e não $V^2E \propto V^3$. Floyd-Warshall com poda de intermediários inalcançáveis também cresce como $V^2$ ($a = \expVFW$), em vez de $V^3$ ($b = \expFW$). Ou seja, a complexidade teórica é um limite de pior caso; em um grafo particionado em blocos pequenos, o custo efetivo é menor por um fator de $V$.
+\textbf{Todas as fontes e Floyd-Warshall.} Aqui o expoente $b$ fica bem abaixo de 1, e a explicação está na estrutura do grafo. Como cada partida é uma componente com no máximo 8 vértices, um Dijkstra a partir de uma fonte só explora a sua partida: o custo de todas as fontes cresce de forma próxima da linear em $V$ ($a = \expVDijkstra$), e não quadraticamente. Bellman-Ford percorre a lista global de arcos por poucas rodadas para cada fonte, o que dá custo $\approx V \cdot E \propto V^2$ ($a = \expVBF$), e não $V^2E \propto V^3$. Floyd-Warshall com poda de intermediários inalcançáveis também cresce como $V^2$ ($a = \expVFW$), em vez de $V^3$ ($b = \expFW$); já a versão numpy, sem poda, cresce como o pior caso ($a = \expVFWnumpy$). Ou seja, a complexidade teórica é um limite de pior caso; em um grafo particionado em blocos pequenos, o custo efetivo é menor por um fator de $V$.
 
 \subsection{Parte III: Análise de Propriedades da Rede}
 
@@ -317,11 +317,11 @@ Investigamos se $P(k) \sim k^{-\gamma}$. A Figura~\ref{fig:lp} mostra a distribu
 
 \textbf{A distribuição não sugere lei de potência.} A regressão em log-log tem inclinação \emph{positiva} ($P(k) \propto k^{+1{,}26}$) e $R^2 = 0{,}46$: os pontos não formam uma reta decrescente, e sim uma curva com máximo em $k = 3$. A CCDF cai abruptamente após $k = 4$, em vez de decair lentamente. Além disso, a razão $k_{max}/\langle k \rangle = 1{,}66$ indica ausência de hubs, e a variância dos graus ($2{,}00$) é menor que a média ($4{,}22$). A distribuição é \emph{subdispersa} e se aproxima mais de uma Poisson (curva verde) do que de uma lei de potência. Faz sentido: o grau é limitado pelo tamanho da partida ($k \leq 7$), o que impede qualquer cauda pesada.
 
-Para não depender apenas da regressão, que é sabidamente enviesada~\cite{clauset2009}, aplicamos também o estimador de máxima verossimilhança (MV) discreto aproximado,
+Para não depender apenas da regressão, que é sabidamente enviesada~\cite{clauset2009}, aplicamos também o estimador de máxima verossimilhança (MV) discreto exato. Para a lei de potência discreta $P(k) = k^{-\gamma}/\zeta(\gamma, k_{min})$, em que $\zeta$ é a função zeta de Hurwitz, maximizamos numericamente
 \[
-  \hat\gamma = 1 + n_c \Big/ \sum_{i=1}^{n_c} \ln\frac{k_i}{k_{min} - 1/2},
+  \ln \mathcal{L}(\gamma) = -\gamma \sum_{i=1}^{n_c} \ln k_i - n_c \ln \zeta(\gamma, k_{min}),
 \]
-onde $n_c$ é o número de vértices na cauda ($k_i \geq k_{min}$), escolhendo $k_{min}$ pela menor distância de Kolmogorov--Smirnov (KS) entre a CCDF empírica e a do modelo, entre os valores que deixam ao menos 50 vértices e 3 graus distintos na cauda (Tabela~\ref{tab:pl}).
+onde $n_c$ é o número de vértices na cauda ($k_i \geq k_{min}$). O erro padrão vem da curvatura de $\ln \mathcal{L}$ no ótimo. Escolhemos $k_{min}$ pela menor distância de Kolmogorov--Smirnov (KS) entre a CCDF empírica e a do modelo, $P(K \geq k) = \zeta(\gamma, k)/\zeta(\gamma, k_{min})$, entre os valores que deixam ao menos 50 vértices e 3 graus distintos na cauda (Tabela~\ref{tab:pl}).
 
 \begin{table}[h]
   \caption{Ajuste de lei de potência: regressão log-log e máxima verossimilhança.}
@@ -331,7 +331,7 @@ onde $n_c$ é o número de vértices na cauda ($k_i \geq k_{min}$), escolhendo $
   \end{adjustbox}
 \end{table}
 
-O MV confirma a conclusão. O melhor ajuste usa apenas a ``cauda'' $k \geq 5$, com três valores de grau, e produz $\hat\gamma \approx 5{,}4$: um decaimento muito mais abrupto que o intervalo $2 < \gamma < 3$ típico de redes livres de escala. Além disso, a distância KS de 0,10 é alta, ou seja, nem nessa cauda curta a lei de potência descreve bem os dados.
+O MV confirma a conclusão. O melhor ajuste usa apenas a ``cauda'' $k \geq 5$, com três valores de grau, e produz $\hat\gamma = 5{,}88 \pm 0{,}38$ (a aproximação contínua usual daria 5,44): um decaimento muito mais abrupto que o intervalo $2 < \gamma < 3$ típico de redes livres de escala. Além disso, a distância KS de 0,13 é alta, ou seja, nem nessa cauda curta a lei de potência descreve bem os dados.
 
 \subsubsection{Robustez}
 Como o grafo é desconexo, a política adotada foi analisar o grafo completo (todas as 62 componentes), já que a LCC tem apenas 8 vértices. Removemos $r = \lfloor 0{,}05 \times 451 \rfloor = 22$ vértices em quatro cenários: remoção aleatória (30 repetições) e ataques por grau, por \textit{betweenness} e por PageRank. Nos ataques, a centralidade foi calculada uma vez, no grafo original (ranking fixo), com implementações próprias: algoritmo de Brandes para a \textit{betweenness} e iteração de potência ($\alpha = 0{,}85$) para o PageRank. O PageRank foi calculado na versão \emph{dirigida}, de modo a ranquear quem recebe mais atenção. Medimos: (A) tamanho da LCC e fração de vértices no maior pedaço conexo da própria partida; (B) número de componentes; (C) comprimento médio e eficiência global $E = \frac{1}{n(n-1)}\sum_{u\neq v} 1/d(u,v)$; e (D) fração de vértices isolados.
