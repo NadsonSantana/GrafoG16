@@ -2,15 +2,16 @@
   \toprule
   Algoritmo & $f(V,E)$ & $b$ & $R^2$ & $a$ & $R^2$ \\
   \midrule
-  BFS & $O(V+E)$ & 1,10 & 0,997 & 1,09 & 0,997 \\
-  DFS & $O(V+E)$ & 1,09 & 0,997 & 1,07 & 0,997 \\
-  Eulerianidade & $O(V+E)$ & 0,88 & 0,994 & 0,87 & 0,995 \\
-  Dijkstra* & $O(V(V+E)\log V)$ & 0,44 & 0,998 & 0,97 & 0,999 \\
-  Bellman-Ford* & $O(V^2E)$ & 0,71 & 0,986 & 2,13 & 0,987 \\
-  Floyd-Warshall & $O(V^3)$ & 0,68 & 0,995 & 2,05 & 0,995 \\
-  Tarjan & $O(V+E)$ & 1,28 & 0,941 & 1,26 & 0,942 \\
-  Prim & $O(E\log V)$ & 1,09 & 0,876 & 1,29 & 0,880 \\
-  Kruskal & $O(E\log V)$ & 1,01 & 0,943 & 1,19 & 0,946 \\
+  BFS & $O(V+E)$ & 1,12 & 0,995 & 1,10 & 0,996 \\
+  DFS & $O(V+E)$ & 1,02 & 0,992 & 1,01 & 0,993 \\
+  Eulerianidade & $O(V+E)$ & 1,01 & 0,948 & 1,00 & 0,951 \\
+  Dijkstra* & $O(V(V+E)\log V)$ & 0,57 & 0,896 & 1,25 & 0,899 \\
+  Bellman-Ford* & $O(V^2E)$ & 0,79 & 0,987 & 2,35 & 0,988 \\
+  Floyd-Warshall & $O(V^3)$ & 0,69 & 0,995 & 2,08 & 0,995 \\
+  Tarjan & $O(V+E)$ & 1,06 & 0,998 & 1,05 & 0,999 \\
+  Pontes/articulações & $O(V+E)$ & 1,07 & 0,994 & 1,06 & 0,993 \\
+  Prim & $O(E\log V)$ & 0,91 & 0,998 & 1,07 & 0,997 \\
+  Kruskal & $O(E\log V)$ & 0,91 & 0,998 & 1,07 & 0,999 \\
   \bottomrule
   \multicolumn{6}{l}{\footnotesize * a partir de todas as fontes. $b$: tempo $\propto f(V,E)^b$; $a$: tempo $\propto V^a$.} \\
 \end{tabular}

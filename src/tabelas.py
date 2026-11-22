@@ -164,22 +164,23 @@ def tab_robustez():
         xs = [x[chave] * f for x in al]
         return f"{num(statistics.mean(xs), casas)} $\\pm$ {num(statistics.stdev(xs), casas)}"
 
-    o, gr, bc = r["original"], r["grau"], r["betweenness"]
+    o, gr, bc, pr = r["original"], r["grau"], r["betweenness"], r["pagerank"]
     linhas = [
-        ("A: LCC", o["A_lcc"], mdp("A_lcc", casas=0), gr["A_lcc"], bc["A_lcc"]),
+        ("A: LCC", o["A_lcc"], mdp("A_lcc", casas=0), gr["A_lcc"], bc["A_lcc"], pr["A_lcc"]),
         ("A: fração no núcleo", num(o["A_partidas"], 3), mdp("A_partidas"),
-         num(gr["A_partidas"], 3), num(bc["A_partidas"], 3)),
+         num(gr["A_partidas"], 3), num(bc["A_partidas"], 3), num(pr["A_partidas"], 3)),
         ("B: componentes", o["B_componentes"], mdp("B_componentes", casas=1),
-         gr["B_componentes"], bc["B_componentes"]),
+         gr["B_componentes"], bc["B_componentes"], pr["B_componentes"]),
         ("C: comp. médio", num(o["C_caminho_medio"], 3), mdp("C_caminho_medio"),
-         num(gr["C_caminho_medio"], 3), num(bc["C_caminho_medio"], 3)),
+         num(gr["C_caminho_medio"], 3), num(bc["C_caminho_medio"], 3), num(pr["C_caminho_medio"], 3)),
         ("C: eficiência ($\\times 10^{-2}$)", num(o["C_eficiencia"] * 100, 3),
-         mdp("C_eficiencia", 100), num(gr["C_eficiencia"] * 100, 3), num(bc["C_eficiencia"] * 100, 3)),
+         mdp("C_eficiencia", 100), num(gr["C_eficiencia"] * 100, 3), num(bc["C_eficiencia"] * 100, 3),
+         num(pr["C_eficiencia"] * 100, 3)),
         ("D: isolados (\\%)", num(o["D_isolados"] * 100, 2), mdp("D_isolados", 100, 2),
-         num(gr["D_isolados"] * 100, 2), num(bc["D_isolados"] * 100, 2)),
+         num(gr["D_isolados"] * 100, 2), num(bc["D_isolados"] * 100, 2), num(pr["D_isolados"] * 100, 2)),
     ]
     salvar("tab_robustez.tex", tabular(
-        "lrrrr", ["Métrica", "Original", "Aleatória", "Grau", "Betw."], linhas))
+        "lrrrrr", ["Métrica", "Original", "Aleatória", "Grau", "Betw.", "PageRank"], linhas))
 
 
 def tab_modelos():

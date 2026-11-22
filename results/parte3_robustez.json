@@ -266,6 +266,16 @@
     "C_eficiencia": 0.011183909548395517,
     "D_isolados": 0.011655011655011656
   },
+  "pagerank": {
+    "A_lcc": 8,
+    "A_partidas": 0.9423503325942351,
+    "B_componentes": 66,
+    "C_caminho_medio": 1.3706020328381547,
+    "C_eficiencia": 0.011428083857990398,
+    "D_isolados": 0.009324009324009324
+  },
+  "partidas_afetadas_pr": 18,
+  "sobreposicao_grau_pr": 5,
   "partidas_afetadas_grau": 17,
   "partidas_afetadas_bc": 20
 }

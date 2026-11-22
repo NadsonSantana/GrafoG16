@@ -7,9 +7,9 @@
     "vertices_grau_impar": 236
   },
   "euler_por_partida": {
-    "nao_euleriano": 45,
+    "circuito": 2,
     "caminho": 15,
-    "circuito": 2
+    "nao_euleriano": 45
   },
   "pares_alcancaveis": 2870,
   "distancia_media": 2.1858944982578397,
@@ -32,6 +32,10 @@
   },
   "scc_nao_triviais": 62,
   "partidas_fortemente_conexas": 19,
+  "pontes": 3,
+  "articulacoes": 3,
+  "partidas_com_ponte": 3,
+  "partidas_com_articulacao": 3,
   "prim_arestas": 389,
   "prim_peso": 551.9589849999996,
   "kruskal_arestas": 389,
