@@ -110,3 +110,13 @@ def test_arestas_tratadas_consistentes():
     # toda aresta não-direcionada vem de ao menos um arco dirigido
     arcos = {(a["origem"], a["destino"]) for a in ler_csv("arestas_dirigidas.csv")}
     assert all((u, v) in arcos or (v, u) in arcos for u, v in pares)
+
+
+def test_atencao_de_todos_os_pares_gera_os_arcos():
+    pares = ler_csv("atencao_pares.csv")
+    assert len(pares) == 2870  # todos os pares ordenados intra-partida
+    acima = {(nome_vertice(int(p["partida"]), int(p["origem"])),
+              nome_vertice(int(p["partida"]), int(p["destino"])))
+             for p in pares if float(p["atencao"]) * int(p["participantes"]) >= 1 - 1e-9}
+    arcos = {(a["origem"], a["destino"]) for a in ler_csv("arestas_dirigidas.csv")}
+    assert acima == arcos

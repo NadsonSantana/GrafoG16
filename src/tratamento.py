@@ -77,6 +77,7 @@ def tratar():
     meta = pd.read_csv(os.path.join(ORIGEM, "network_list.csv"))
 
     vertices = []
+    pares = []
     dirigidas = []
     nao_dirigidas = []
     partidas = []
@@ -103,6 +104,11 @@ def tratar():
                          "atencao_laptop": round(float(dados[:, :, 0].mean()), 4)})
         for i in range(n):
             vertices.append({"id": nome_vertice(g, i + 1), "partida": g, "participante": i + 1})
+        for i in range(n):
+            for j in range(n):
+                if i != j:
+                    pares.append({"partida": g, "participantes": n, "origem": i + 1, "destino": j + 1,
+                                  "atencao": round(float(atencao[i, j]), 6)})
         arcos, arestas = arestas_partida(g, atencao)
         dirigidas.extend(arcos)
         nao_dirigidas.extend(arestas)
@@ -116,6 +122,7 @@ def tratar():
     _salvar_csv("arestas_dirigidas.csv", dirigidas)
     _salvar_csv("arestas.csv", nao_dirigidas)
     _salvar_csv("partidas.csv", partidas)
+    _salvar_csv("atencao_pares.csv", pares)  # todos os pares ordenados, antes do limiar
     with open(os.path.join(DESTINO, "etapas_tratamento.json"), "w") as f:
         json.dump(etapas, f, indent=2)
     return etapas
