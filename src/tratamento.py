@@ -36,6 +36,42 @@ def carregar_partida(partida, n):
     return df.values.reshape(len(df), n, n + 1)
 
 
+def matriz_atencao(dados):
+    """f[i, j]: fração dos instantes em que i olha para j (laptop e auto-laços excluídos)."""
+    atencao = dados[:, :, 1:].mean(axis=0)
+    np.fill_diagonal(atencao, 0.0)
+    return atencao
+
+
+def arestas_partida(partida, atencao):
+    """Aplica o limiar 1/N (N = n alvos: n-1 colegas + laptop) e a simetrização.
+
+    Retorna (arcos dirigidos, arestas não-direcionadas), cada um como lista de dicionários
+    com atenção e distância d = -ln(atenção).
+    """
+    n = atencao.shape[0]
+    limiar = 1.0 / n
+    arcos = []
+    for i in range(n):
+        for j in range(n):
+            if i != j and atencao[i, j] >= limiar:
+                arcos.append({
+                    "origem": nome_vertice(partida, i + 1), "destino": nome_vertice(partida, j + 1),
+                    "atencao": round(float(atencao[i, j]), 6),
+                    "distancia": round(-math.log(atencao[i, j]), 6),
+                })
+    arestas = []
+    for i in range(n):
+        for j in range(i + 1, n):
+            if atencao[i, j] >= limiar or atencao[j, i] >= limiar:
+                w = (atencao[i, j] + atencao[j, i]) / 2
+                arestas.append({
+                    "origem": nome_vertice(partida, i + 1), "destino": nome_vertice(partida, j + 1),
+                    "atencao": round(float(w), 6), "distancia": round(-math.log(w), 6),
+                })
+    return arcos, arestas
+
+
 def tratar():
     os.makedirs(DESTINO, exist_ok=True)
     meta = pd.read_csv(os.path.join(ORIGEM, "network_list.csv"))
@@ -60,32 +96,16 @@ def tratar():
         etapas["arestas_temporais"] += int(dados[:, :, 1:].sum())
         etapas["arestas_temporais_laptop"] += int(dados[:, :, 0].sum())
 
-        atencao = dados[:, :, 1:].mean(axis=0)  # f[i, j]: fração do tempo em que i olha j
-        np.fill_diagonal(atencao, 0.0)
+        atencao = matriz_atencao(dados)
         etapas["pares_estaticos"] += int((atencao > 0).sum())
-        limiar = 1.0 / n
 
         partidas.append({"partida": g, "participantes": n, "duracao_s": round(t / 3, 1),
                          "atencao_laptop": round(float(dados[:, :, 0].mean()), 4)})
         for i in range(n):
             vertices.append({"id": nome_vertice(g, i + 1), "partida": g, "participante": i + 1})
-
-        for i in range(n):
-            for j in range(n):
-                if i != j and atencao[i, j] >= limiar:
-                    dirigidas.append({
-                        "origem": nome_vertice(g, i + 1), "destino": nome_vertice(g, j + 1),
-                        "atencao": round(float(atencao[i, j]), 6),
-                        "distancia": round(-math.log(atencao[i, j]), 6),
-                    })
-        for i in range(n):
-            for j in range(i + 1, n):
-                if atencao[i, j] >= limiar or atencao[j, i] >= limiar:
-                    w = (atencao[i, j] + atencao[j, i]) / 2
-                    nao_dirigidas.append({
-                        "origem": nome_vertice(g, i + 1), "destino": nome_vertice(g, j + 1),
-                        "atencao": round(float(w), 6), "distancia": round(-math.log(w), 6),
-                    })
+        arcos, arestas = arestas_partida(g, atencao)
+        dirigidas.extend(arcos)
+        nao_dirigidas.extend(arestas)
 
     etapas["pares_apos_limiar"] = len(dirigidas)
     etapas["arestas_nao_dirigidas"] = len(nao_dirigidas)
