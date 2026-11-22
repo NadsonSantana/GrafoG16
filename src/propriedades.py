@@ -6,6 +6,8 @@ import random
 from collections import deque
 
 import numpy as np
+from scipy.optimize import minimize_scalar
+from scipy.special import zeta
 
 from .algoritmos import bfs, componentes_conexas
 from .grafo import Grafo
@@ -114,7 +116,7 @@ def small_world(g, blocos, repeticoes=30, semente=42):
 
 def lei_de_potencia(g):
     """Ajuste P(k) ~ C k^-gamma por mínimos quadrados em log-log, CCDF e
-    estimador de máxima verossimilhança discreto (aproximação de Clauset et al.)."""
+    estimador de máxima verossimilhança discreto exato (Clauset et al.) com kmin por KS."""
     dist = distribuicao_graus(g)
     n = g.num_vertices()
     ks = np.array([k for k in dist if k > 0], dtype=float)
@@ -139,17 +141,31 @@ def lei_de_potencia(g):
     }
 
 
+def log_verossimilhanca(gamma, cauda, kmin):
+    """Log-verossimilhança da lei de potência discreta P(k) = k^-gamma / zeta(gamma, kmin)."""
+    return -gamma * np.sum(np.log(cauda)) - len(cauda) * math.log(zeta(gamma, kmin))
+
+
 def ajuste_mv(graus_lista, kmin):
-    """MV discreto aproximado (Clauset, Shalizi e Newman, 2009) na cauda k >= kmin,
-    com a distância de Kolmogorov-Smirnov entre a CCDF empírica e a do modelo."""
+    """MV discreto exato (Clauset, Shalizi e Newman, 2009) na cauda k >= kmin: maximiza
+    numericamente a log-verossimilhança com a função zeta de Hurwitz. O erro padrão vem da
+    curvatura da log-verossimilhança no ótimo, e a distância de Kolmogorov-Smirnov compara a
+    CCDF empírica com P(K >= k) = zeta(gamma, k) / zeta(gamma, kmin). A aproximação contínua
+    gamma = 1 + n / sum ln(k / (kmin - 1/2)) é mantida para comparação."""
     cauda = np.sort(graus_lista[graus_lista >= kmin])
     nt = len(cauda)
-    gamma = 1 + nt / np.sum(np.log(cauda / (kmin - 0.5)))
+    otimo = minimize_scalar(lambda g: -log_verossimilhanca(g, cauda, kmin),
+                            bounds=(1.0001, 50.0), method="bounded", options={"xatol": 1e-8})
+    gamma = float(otimo.x)
+    h = 1e-4
+    curvatura = (log_verossimilhanca(gamma + h, cauda, kmin) - 2 * log_verossimilhanca(gamma, cauda, kmin)
+                 + log_verossimilhanca(gamma - h, cauda, kmin)) / h ** 2
     valores = np.unique(cauda)
     empirica = 1 - np.searchsorted(cauda, valores, side="left") / nt
-    modelo = ((valores - 0.5) / (kmin - 0.5)) ** (1 - gamma)
-    return {"kmin": int(kmin), "gamma": float(gamma), "ks": float(np.max(np.abs(empirica - modelo))),
-            "n_cauda": int(nt), "erro_padrao": float((gamma - 1) / math.sqrt(nt))}
+    modelo = zeta(gamma, valores) / zeta(gamma, kmin)
+    return {"kmin": int(kmin), "gamma": gamma, "ks": float(np.max(np.abs(empirica - modelo))),
+            "n_cauda": int(nt), "erro_padrao": float(1 / math.sqrt(-curvatura)),
+            "gamma_aprox": float(1 + nt / np.sum(np.log(cauda / (kmin - 0.5))))}
 
 
 def melhor_kmin(graus_lista, cauda_minima=50, valores_minimos=3):

@@ -60,6 +60,12 @@ def numero_triangulos(g):
     return sum(triangulos_por_vertice(g).values()) // 3
 
 
+def transitividade(g):
+    """Transitividade global: 3 x triângulos / triplas conexas (caminhos de comprimento 2)."""
+    triplas = sum(len(g.adj[v]) * (len(g.adj[v]) - 1) / 2 for v in g.adj)
+    return 3 * numero_triangulos(g) / triplas if triplas else 0.0
+
+
 def clusterizacao_local(g):
     """C_i = 2 T_i / (k_i (k_i - 1)); vale 0 quando k_i < 2."""
     t = triangulos_por_vertice(g)
@@ -105,5 +111,6 @@ def metricas_estruturais(g):
         "caminho_medio_global": caminhos_medios(g),
         "clusterizacao_media": clusterizacao_media(g),
         "triangulos": numero_triangulos(g),
+        "transitividade": transitividade(g),
         "distribuicao_graus": distribuicao_graus(g),
     }

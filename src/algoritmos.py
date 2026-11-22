@@ -135,6 +135,24 @@ def floyd_warshall(g):
     return vs, d
 
 
+def floyd_warshall_numpy(g):
+    """Floyd-Warshall vetorizado com numpy: cada iteração de k atualiza a matriz inteira
+    de uma vez. Mesma complexidade O(V^3), sem poda. Retorna (vértices, matriz numpy)."""
+    import numpy as np
+
+    vs = list(g.adj)
+    idx = {v: i for i, v in enumerate(vs)}
+    n = len(vs)
+    d = np.full((n, n), np.inf)
+    np.fill_diagonal(d, 0.0)
+    for u in vs:
+        for v, w in g.adj[u].items():
+            d[idx[u], idx[v]] = min(d[idx[u], idx[v]], w)
+    for k in range(n):
+        np.minimum(d, d[:, k, None] + d[None, k, :], out=d)
+    return vs, d
+
+
 def tarjan(g):
     """Componentes fortemente conexas (Tarjan), versão iterativa. O(V + E)."""
     indice = {}
