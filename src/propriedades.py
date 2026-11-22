@@ -6,6 +6,7 @@ import random
 from collections import deque
 
 import numpy as np
+from scipy import stats
 from scipy.optimize import minimize_scalar
 from scipy.special import zeta
 
@@ -141,6 +142,61 @@ def lei_de_potencia(g):
     }
 
 
+def _qui_quadrado(observados, esperados, parametros):
+    """Teste qui-quadrado de aderência, juntando classes vizinhas até a frequência
+    esperada atingir 5. Graus de liberdade: classes - 1 - parâmetros estimados."""
+    classes = [[observados[0], esperados[0]]]
+    for o, e in zip(observados[1:], esperados[1:]):
+        if classes[-1][1] < 5:
+            classes[-1][0] += o
+            classes[-1][1] += e
+        else:
+            classes.append([o, e])
+    while len(classes) > 1 and classes[-1][1] < 5:
+        o, e = classes.pop()
+        classes[-1][0] += o
+        classes[-1][1] += e
+    obs = np.array([c[0] for c in classes], dtype=float)
+    esp = np.array([c[1] for c in classes])
+    estatistica = float(((obs - esp) ** 2 / esp).sum())
+    gl = len(classes) - 1 - parametros
+    return {"qui2": estatistica, "gl": gl, "p": float(stats.chi2.sf(estatistica, gl)),
+            "classes": len(classes)}
+
+
+def aderencia_graus(g, blocos):
+    """Compara a distribuição de graus com uma Poisson de mesma média e com a mistura de
+    binomiais Bin(n_p - 1, p_p) de cada partida (n_p vértices, densidade p_p), que respeita
+    o limite k <= n_p - 1. Inclui o teste de dispersão (Var/média = 1 sob Poisson)."""
+    ks = np.array([len(g.adj[v]) for v in g.adj])
+    n, media, var = len(ks), float(ks.mean()), float(ks.var(ddof=1))
+    kmax = int(ks.max()) + 1
+    observados = np.bincount(ks, minlength=kmax + 1)[:kmax + 1]
+    poisson = stats.poisson.pmf(np.arange(kmax + 1), media)
+    poisson[-1] = 1 - poisson[:-1].sum()  # última classe: k >= kmax
+    mistura = np.zeros(kmax + 1)
+    for bloco in blocos:
+        nb = len(bloco)
+        if nb < 2:
+            mistura[0] += 1
+            continue
+        pb = 2 * g.subgrafo(bloco).num_arestas() / (nb * (nb - 1))
+        pmf = nb * stats.binom.pmf(np.arange(nb), nb - 1, pb)
+        mistura[:min(nb, kmax)] += pmf[:kmax]
+        mistura[kmax] += pmf[kmax:].sum()  # última classe: k >= kmax
+    dispersao = (n - 1) * var / media
+    return {
+        "indice_dispersao": var / media,
+        "dispersao_qui2": dispersao,
+        "dispersao_p_sub": float(stats.chi2.cdf(dispersao, n - 1)),  # unilateral: subdispersão
+        "poisson": _qui_quadrado(observados, poisson * n, 1),
+        "binomial_partidas": _qui_quadrado(observados, mistura, 0),
+        "observados": observados.tolist(),
+        "esperados_poisson": (poisson * n).tolist(),
+        "esperados_binomial": mistura.tolist(),
+    }
+
+
 def log_verossimilhanca(gamma, cauda, kmin):
     """Log-verossimilhança da lei de potência discreta P(k) = k^-gamma / zeta(gamma, kmin)."""
     return -gamma * np.sum(np.log(cauda)) - len(cauda) * math.log(zeta(gamma, kmin))
@@ -265,37 +321,68 @@ def metricas_robustez(g, n_original=None):
     }
 
 
-def robustez(g, fracao=0.05, repeticoes=30, semente=42, dirigido=None):
+def robustez(g, fracao=0.05, repeticoes=30, semente=42, dirigido=None,
+             fracoes_curva=(0.05, 0.10, 0.15, 0.20, 0.25, 0.30)):
     """Compara remoção aleatória (várias repetições) com ataques direcionados por grau,
     betweenness e PageRank (ranking fixo, calculado no grafo original). O PageRank é
-    calculado na versão dirigida, quando fornecida (quem recebe atenção)."""
+    calculado na versão dirigida, quando fornecida (quem recebe atenção).
+
+    r = ceil(fracao * n), como no Apêndice C. A curva S(f) repete a comparação para
+    frações crescentes, com os mesmos rankings fixos."""
     rng = random.Random(semente)
-    r = int(math.floor(fracao * g.num_vertices()))
     vs = g.vertices()
     n = g.num_vertices()
+    r = math.ceil(fracao * n)
     base = metricas_robustez(g)
 
     aleatorias = [metricas_robustez(g.remover_vertices(rng.sample(vs, r)), n)
                   for _ in range(repeticoes)]
 
     gr = graus(g)
-    top_grau = sorted(vs, key=lambda v: (-gr[v], v))[:r]
     bc = betweenness(g)
-    top_bc = sorted(vs, key=lambda v: (-bc[v], v))[:r]
     pr = pagerank(dirigido if dirigido is not None else g)
-    top_pr = sorted(vs, key=lambda v: (-pr[v], v))[:r]
+    rankings = {
+        "grau": sorted(vs, key=lambda v: (-gr[v], v)),
+        "betweenness": sorted(vs, key=lambda v: (-bc[v], v)),
+        "pagerank": sorted(vs, key=lambda v: (-pr[v], v)),
+    }
+    top = {nome: ordem[:r] for nome, ordem in rankings.items()}
     return {
         "r": r,
         "original": base,
         "aleatoria": aleatorias,
-        "grau": metricas_robustez(g.remover_vertices(top_grau), n),
-        "betweenness": metricas_robustez(g.remover_vertices(top_bc), n),
-        "pagerank": metricas_robustez(g.remover_vertices(top_pr), n),
-        "partidas_afetadas_pr": len({v.split("_")[0] for v in top_pr}),
-        "sobreposicao_grau_pr": len(set(top_grau) & set(top_pr)),
-        "partidas_afetadas_grau": len({v.split("_")[0] for v in top_grau}),
-        "partidas_afetadas_bc": len({v.split("_")[0] for v in top_bc}),
+        **{nome: metricas_robustez(g.remover_vertices(alvos), n) for nome, alvos in top.items()},
+        "partidas_afetadas_pr": len({v.split("_")[0] for v in top["pagerank"]}),
+        "sobreposicao_grau_pr": len(set(top["grau"]) & set(top["pagerank"])),
+        "partidas_afetadas_grau": len({v.split("_")[0] for v in top["grau"]}),
+        "partidas_afetadas_bc": len({v.split("_")[0] for v in top["betweenness"]}),
+        "curva": curva_remocao(g, rankings, fracoes_curva, repeticoes, rng),
     }
+
+
+def curva_remocao(g, rankings, fracoes, repeticoes, rng):
+    """S(f): fração no núcleo da partida (A) e de isolados (D) para cada fração removida f,
+    na remoção aleatória (média e desvio de várias repetições) e nos ataques de ranking fixo."""
+    vs = g.vertices()
+    n = g.num_vertices()
+    curva = {"fracoes": [0.0] + list(fracoes), "aleatoria": [], "ataques": {k: [] for k in rankings}}
+    base = metricas_robustez(g)
+    curva["aleatoria"].append({"A_media": base["A_partidas"], "A_dp": 0.0,
+                               "D_media": base["D_isolados"], "D_dp": 0.0})
+    for nome in rankings:
+        curva["ataques"][nome].append({"A": base["A_partidas"], "D": base["D_isolados"]})
+    for f in fracoes:
+        r = math.ceil(f * n)
+        amostras = [metricas_robustez(g.remover_vertices(rng.sample(vs, r)), n)
+                    for _ in range(repeticoes)]
+        a = [x["A_partidas"] for x in amostras]
+        d = [x["D_isolados"] for x in amostras]
+        curva["aleatoria"].append({"A_media": float(np.mean(a)), "A_dp": float(np.std(a, ddof=1)),
+                                   "D_media": float(np.mean(d)), "D_dp": float(np.std(d, ddof=1))})
+        for nome, ordem in rankings.items():
+            m = metricas_robustez(g.remover_vertices(ordem[:r]), n)
+            curva["ataques"][nome].append({"A": m["A_partidas"], "D": m["D_isolados"]})
+    return curva
 
 
 # ---------------------------------------------------------------- modelos clássicos

@@ -113,11 +113,27 @@ def tab_tempos():
 
 def tab_escala():
     a = ler("parte2_escala.json")["ajuste"]
-    linhas = [(nome, f"${x['complexidade']}$", num(x["expoente"], 2), num(x["r2"], 3),
-               num(x["expoente_v"], 2), num(x["r2_v"], 3)) for nome, x in a.items()]
+    linhas = [(nome, f"${x['complexidade']}$", f"{num(x['v_min'])}--{num(x['v_max'])}",
+               num(x["expoente"], 2), num(x["r2"], 3), num(x["expoente_v"], 2), num(x["r2_v"], 3))
+              for nome, x in a.items()]
     salvar("tab_escala.tex", tabular(
-        "llrrrr", ["Algoritmo", "$f(V,E)$", "$b$", "$R^2$", "$a$", "$R^2$"], linhas,
+        "llcrrrr", ["Algoritmo", "$f(V,E)$", "$V$", "$b$", "$R^2$", "$a$", "$R^2$"], linhas,
         "* a partir de todas as fontes. Ajuste sobre a mediana de cada ponto. $b$: tempo $\\propto f(V,E)^b$; $a$: tempo $\\propto V^a$."))
+
+
+def tab_sensibilidade():
+    linhas = []
+    for x in ler("parte3_sensibilidade.json"):
+        rotulo = x["limiar"].replace("≥", "$\\geq$").replace(" (adotado)", "")
+        if "adotado" in x["limiar"]:
+            rotulo = f"\\textbf{{{rotulo}}}"
+        linhas.append((rotulo, num(x["arestas"]), num(x["grau_medio"], 2), x["componentes"],
+                       x["isolados"], num(x["C"], 3), num(x["L"], 2), x["diametro_max"],
+                       num(x["reciprocidade"] * 100, 1), num(x["sigma_blocos"], 2)))
+    salvar("tab_sensibilidade.tex", tabular(
+        "lrrrrrrrrr", ["Limiar", "$m$", "$\\langle k\\rangle$", "Comp.", "Isol.", "$C$", "$L$",
+                       "Diâm.", "Recíp. (\\%)", "$\\sigma_{blocos}$"], linhas,
+        "Grau médio $\\langle k\\rangle$, diâmetro máximo entre componentes, fração de arcos recíprocos e $\\sigma$ contra o aleatório por partidas (10 amostras)."))
 
 
 def tab_small_world():
@@ -141,6 +157,7 @@ def tab_small_world():
 def tab_potencia():
     lp = ler("parte3_lei_potencia.json")
     mv = lp["mv"]
+    ad = lp["aderencia"]
     linhas = [
         ("Regressão log-log de $P(k)$: inclinação", num(-lp["gamma_mq"], 2)),
         ("Regressão log-log: $R^2$", num(lp["r2"], 2)),
@@ -152,6 +169,11 @@ def tab_potencia():
         ("MV: distância KS", num(mv["ks"], 3)),
         ("$\\langle k \\rangle$ / Var($k$)", f"{num(lp['k_medio'], 2)} / {num(lp['variancia_k'], 2)}"),
         ("$k_{max} / \\langle k \\rangle$", num(lp["razao_kmax_kmedio"], 2)),
+        ("Dispersão Var($k$)/$\\langle k \\rangle$ (Poisson: 1)", num(ad["indice_dispersao"], 2)),
+        ("$\\chi^2$ contra Poisson ($\\langle k \\rangle$)",
+         f"{num(ad['poisson']['qui2'], 1)} ({ad['poisson']['gl']} g.l.; $p = {cientifico(ad['poisson']['p'], 1).strip('$')}$)"),
+        ("$\\chi^2$ contra Binomial por partida",
+         f"{num(ad['binomial_partidas']['qui2'], 1)} ({ad['binomial_partidas']['gl']} g.l.; $p = {cientifico(ad['binomial_partidas']['p'], 1).strip('$')}$)"),
     ]
     salvar("tab_potencia.tex", tabular("lr", ["Medida", "Valor"], linhas))
 
@@ -196,6 +218,29 @@ def tab_modelos():
         "lrrrrr", ["Modelo", "$k_{max}$", "Var($k$)", "$C$", "$L$", "Comp."], linhas))
 
 
+def macros_serie_temporal():
+    """Valores da Figura do grafo original (data/processed/serie_temporal.csv)."""
+    import csv
+    with open(os.path.join(DADOS, "serie_temporal.csv"), newline="") as f:
+        linhas = list(csv.DictReader(f))
+    faixas = sorted({int(x["faixa"]) for x in linhas})
+
+    def media(chave, k):
+        return statistics.mean(float(x[chave]) for x in linhas if int(x["faixa"]) == k)
+
+    laptop = [media("laptop", k) for k in faixas]
+    return {
+        "laptopInicio": num(max(laptop[:3]) * 100, 1),
+        "laptopMeio": num(min(laptop) * 100, 1),
+        "laptopFim": num(laptop[-1] * 100, 1),
+        "focoMedio": num(statistics.mean(float(x["foco"]) for x in linhas) * 100, 0),
+        "focoAcaso": num(statistics.mean(float(x["foco_uniforme"]) for x in linhas) * 100, 0),
+    }
+
+
+LINEARES_ESCALA = ("BFS", "DFS", "Eulerianidade", "Tarjan", "Pontes/articulações")
+
+
 def valores():
     """Macros com valores que variam a cada execução e são citados no texto."""
     t = ler("parte2_tempos.json")
@@ -220,6 +265,14 @@ def valores():
         "razaoFWnumpy": num(ms["Floyd-Warshall (numpy)"] / ms["Floyd-Warshall"], 1),
         "expVFWnumpy": num(a["Floyd-Warshall (numpy)"]["expoente_v"], 2),
         "expEuler": num(a["Eulerianidade"]["expoente"], 2),
+        "expVMinLinear": num(min(a[k]["expoente_v"] for k in LINEARES_ESCALA), 2),
+        "expVMaxLinear": num(max(a[k]["expoente_v"] for k in LINEARES_ESCALA), 2),
+        "expVPrim": num(a["Prim"]["expoente_v"], 2),
+        "expVKruskal": num(a["Kruskal"]["expoente_v"], 2),
+        "VmaxEscala": num(max(x["v_max"] for x in a.values())),
+        "VmaxBF": num(a["Bellman-Ford*"]["v_max"]),
+        "VmaxFW": num(a["Floyd-Warshall"]["v_max"]),
+        "VmaxFWnumpy": num(a["Floyd-Warshall (numpy)"]["v_max"]),
     }
     sw = ler("parte3_small_world.json")["global"]
     modelos = ler("parte3_modelos.json")
@@ -231,12 +284,46 @@ def valores():
         "LBlocos": num(sw["er_blocos"]["L_rand"], 2),
         "kmaxBA": num(modelos["Barabasi-Albert"]["grau_max"], 0),
     })
+    rob = ler("parte3_robustez.json")
+    curva = rob["curva"]
+    i30 = len(curva["fracoes"]) - 1
+    macros.update(macros_serie_temporal())
+    ad = ler("parte3_lei_potencia.json")["aderencia"]
+    macros.update({
+        "dispersaoIdx": num(ad["indice_dispersao"], 2),
+        "dispersaoP": cientifico(ad["dispersao_p_sub"], 0).strip("$"),
+        "quiPoisson": num(ad["poisson"]["qui2"], 1),
+        "glPoisson": num(ad["poisson"]["gl"]),
+        "pPoisson": cientifico(ad["poisson"]["p"], 0).strip("$"),
+        "quiBinom": num(ad["binomial_partidas"]["qui2"], 1),
+        "glBinom": num(ad["binomial_partidas"]["gl"]),
+        "pBinom": cientifico(ad["binomial_partidas"]["p"], 0).strip("$"),
+    })
+    macros.update({
+        "rRemovidos": num(rob["r"]),
+        "limiteNucleo": num(1 - rob["r"] / ler("parte1_metricas.json")["vertices"], 3),
+        "nucleoAleat": num(statistics.mean(x["A_partidas"] for x in rob["aleatoria"]), 3),
+        "nucleoGrau": num(rob["grau"]["A_partidas"], 3),
+        "nucleoBtw": num(rob["betweenness"]["A_partidas"], 3),
+        "nucleoPR": num(rob["pagerank"]["A_partidas"], 3),
+        "fracaoMaxCurva": num(curva["fracoes"][-1] * 100, 0),
+        "nucleoAleatMax": num(curva["aleatoria"][i30]["A_media"], 3),
+        "nucleoAtaqueMax": num(min(v[i30]["A"] for v in curva["ataques"].values()), 3),
+        "isolAleatMax": num(curva["aleatoria"][i30]["D_media"] * 100, 1),
+        "isolAtaqueMax": num(max(v[i30]["D"] for v in curva["ataques"].values()) * 100, 1),
+    })
+    sens = {x["limiar"]: x for x in ler("parte3_sensibilidade.json")}
+    sig = [x["sigma_blocos"] for x in sens.values()]
+    macros.update({
+        "sigmaSensMin": num(min(sig), 2),
+        "sigmaSensMax": num(max(sig), 2),
+    })
     salvar("valores.tex", "".join(f"\\newcommand{{\\{k}}}{{{v}}}\n" for k, v in macros.items()))
 
 
 def gerar():
     for f in (tab_etapas, tab_metricas, tab_tempos, tab_escala, tab_small_world, tab_potencia,
-              tab_robustez, tab_modelos, valores):
+              tab_robustez, tab_modelos, tab_sensibilidade, valores):
         f()
 
 

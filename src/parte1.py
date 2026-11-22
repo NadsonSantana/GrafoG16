@@ -21,7 +21,43 @@ def parte1(g):
     figura_graus(m["distribuicao_graus"], g.num_vertices())
     figura_visualizacao(g)
     figura_atencao()
+    figura_original()
     return m
+
+
+def figura_original():
+    """Descrição do grafo original ao longo da partida (tempo normalizado): fração dos
+    olhares dirigidos ao laptop e foco (fração dos olhares recebida pelo mais olhado),
+    média das 62 partidas com faixa interquartil."""
+    import csv
+
+    import numpy as np
+
+    with open(os.path.join(DADOS, "serie_temporal.csv"), newline="") as f:
+        linhas = list(csv.DictReader(f))
+    faixas = sorted({int(x["faixa"]) for x in linhas})
+    x = (np.array(faixas) + 0.5) / len(faixas) * 100
+
+    def serie(chave):
+        por = [[float(l[chave]) for l in linhas if int(l["faixa"]) == k] for k in faixas]
+        return (np.array([np.mean(v) for v in por]), np.array([np.percentile(v, 25) for v in por]),
+                np.array([np.percentile(v, 75) for v in por]))
+
+    fig, (a, b) = plt.subplots(1, 2, figsize=(6.4, 2.3))
+    for ax, chave, titulo in ((a, "laptop", "olhares dirigidos ao laptop"),
+                              (b, "foco", "fração recebida pelo mais olhado")):
+        media, q1, q3 = serie(chave)
+        ax.fill_between(x, q1, q3, color=AZUL, alpha=0.2, linewidth=0, label="faixa interquartil")
+        ax.plot(x, media, "o-", color=AZUL, markersize=3, linewidth=1.6, label="média das partidas")
+        ax.set_title(titulo, fontsize=8)
+        ax.set_xlabel("tempo de partida decorrido (%)")
+        ax.set_xlim(0, 100)
+    uniforme = np.mean([float(l["foco_uniforme"]) for l in linhas])
+    b.axhline(uniforme, color=VERMELHO, linestyle="--", linewidth=1.2, label="olhar ao acaso")
+    b.set_ylim(uniforme - 0.11, None)
+    b.legend(fontsize=6, loc="lower left")
+    fig.tight_layout()
+    salvar_figura(fig, "original_temporal")
 
 
 def figura_atencao():
@@ -120,6 +156,7 @@ def figuras(g):
     figura_graus({int(k): v for k, v in m["distribuicao_graus"].items()}, m["vertices"])
     figura_visualizacao(g)
     figura_atencao()
+    figura_original()
 
 
 def main():

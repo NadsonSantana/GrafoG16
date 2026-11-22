@@ -1,0 +1,67 @@
+[
+  {
+    "limiar": "0,5/N",
+    "arcos": 2106,
+    "arestas": 1320,
+    "grau_medio": 5.853658536585366,
+    "isolados": 0,
+    "componentes": 62,
+    "diametro_max": 2,
+    "C": 0.9279695913842247,
+    "L": 1.0801393728222997,
+    "reciprocidade": 0.7464387464387464,
+    "sigma_blocos": 1.0062605047789586
+  },
+  {
+    "limiar": "1/N (adotado)",
+    "arcos": 1241,
+    "arestas": 951,
+    "grau_medio": 4.21729490022173,
+    "isolados": 0,
+    "componentes": 62,
+    "diametro_max": 3,
+    "C": 0.7541442297539858,
+    "L": 1.3400696864111499,
+    "reciprocidade": 0.467365028203062,
+    "sigma_blocos": 1.153545429966932
+  },
+  {
+    "limiar": "1,5/N",
+    "arcos": 703,
+    "arestas": 607,
+    "grau_medio": 2.6917960088691797,
+    "isolados": 6,
+    "componentes": 69,
+    "diametro_max": 4,
+    "C": 0.4624854819976771,
+    "L": 1.6475644699140402,
+    "reciprocidade": 0.27311522048364156,
+    "sigma_blocos": 1.3890634376796172
+  },
+  {
+    "limiar": "2/N",
+    "arcos": 386,
+    "arestas": 350,
+    "grau_medio": 1.5521064301552105,
+    "isolados": 63,
+    "componentes": 140,
+    "diametro_max": 5,
+    "C": 0.11495090275578083,
+    "L": 1.8170212765957447,
+    "reciprocidade": 0.18652849740932642,
+    "sigma_blocos": 0.9841982099896592
+  },
+  {
+    "limiar": "f ≥ 0,10",
+    "arcos": 1636,
+    "arestas": 1151,
+    "grau_medio": 5.1042128603104215,
+    "isolados": 0,
+    "componentes": 62,
+    "diametro_max": 2,
+    "C": 0.8469116249604058,
+    "L": 1.1979094076655052,
+    "reciprocidade": 0.5929095354523227,
+    "sigma_blocos": 1.04720238509221
+  }
+]

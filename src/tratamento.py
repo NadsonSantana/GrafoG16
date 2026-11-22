@@ -43,14 +43,47 @@ def matriz_atencao(dados):
     return atencao
 
 
-def arestas_partida(partida, atencao):
-    """Aplica o limiar 1/N (N = n alvos: n-1 colegas + laptop) e a simetrização.
+def foco_por_instante(dados):
+    """Em cada instante, fração dos olhares a participantes recebida pelo mais olhado."""
+    pessoas = dados[:, :, 1:].astype(float)
+    recebidos = pessoas.sum(axis=1)  # T x n
+    total = recebidos.sum(axis=1)
+    return np.where(total > 0, recebidos.max(axis=1) / np.maximum(total, 1), np.nan)
+
+
+def foco_uniforme(n, rng, instantes=4000):
+    """Valor esperado do foco se cada participante escolhesse um alvo ao acaso entre os
+    n alvos possíveis (n-1 colegas + laptop), estimado por simulação."""
+    dados = np.zeros((instantes, n, n + 1))
+    for i in range(n):
+        alvos = rng.integers(0, n, size=instantes)  # 0 = laptop; j >= 1 = colega
+        alvos = np.where((alvos >= 1) & (alvos >= i + 1), alvos + 1, alvos)  # pula o próprio i
+        dados[np.arange(instantes), i, np.minimum(alvos, n)] = 1
+    return float(np.nanmean(foco_por_instante(dados)))
+
+
+def serie_temporal(partida, dados, foco_ao_acaso, faixas=20):
+    """Descrição do grafo original ao longo da partida (tempo normalizado em faixas):
+    fração dos olhares dirigidos ao laptop e foco (fração recebida pelo mais olhado)."""
+    foco = foco_por_instante(dados)
+    linhas = []
+    for f, idx in enumerate(np.array_split(np.arange(dados.shape[0]), faixas)):
+        linhas.append({"partida": partida, "faixa": f,
+                       "laptop": round(float(dados[idx, :, 0].mean()), 6),
+                       "foco": round(float(np.nanmean(foco[idx])), 6),
+                       "foco_uniforme": round(foco_ao_acaso, 6)})
+    return linhas
+
+
+def arestas_partida(partida, atencao, limiar=None):
+    """Aplica o limiar (padrão 1/N, N = n alvos: n-1 colegas + laptop) e a simetrização.
 
     Retorna (arcos dirigidos, arestas não-direcionadas), cada um como lista de dicionários
     com atenção e distância d = -ln(atenção).
     """
     n = atencao.shape[0]
-    limiar = 1.0 / n
+    if limiar is None:
+        limiar = 1.0 / n
     arcos = []
     for i in range(n):
         for j in range(n):
@@ -78,6 +111,8 @@ def tratar():
 
     vertices = []
     pares = []
+    serie = []
+    rng = np.random.default_rng(42)
     dirigidas = []
     nao_dirigidas = []
     partidas = []
@@ -109,6 +144,7 @@ def tratar():
                 if i != j:
                     pares.append({"partida": g, "participantes": n, "origem": i + 1, "destino": j + 1,
                                   "atencao": round(float(atencao[i, j]), 6)})
+        serie.extend(serie_temporal(g, dados, foco_uniforme(n, rng)))
         arcos, arestas = arestas_partida(g, atencao)
         dirigidas.extend(arcos)
         nao_dirigidas.extend(arestas)
@@ -123,6 +159,7 @@ def tratar():
     _salvar_csv("arestas.csv", nao_dirigidas)
     _salvar_csv("partidas.csv", partidas)
     _salvar_csv("atencao_pares.csv", pares)  # todos os pares ordenados, antes do limiar
+    _salvar_csv("serie_temporal.csv", serie)  # laptop e foco ao longo de cada partida
     with open(os.path.join(DESTINO, "etapas_tratamento.json"), "w") as f:
         json.dump(etapas, f, indent=2)
     return etapas

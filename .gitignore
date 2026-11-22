@@ -19,3 +19,6 @@ relatorio/*.blg
 relatorio/*.fls
 relatorio/*.fdb_latexmk
 relatorio/*.synctex.gz
+relatorio/comment.cut
+# PDF compilado; o entregável versionado é relatorio/224215945.pdf
+relatorio/main.pdf

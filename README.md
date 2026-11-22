@@ -28,19 +28,19 @@ Grafo atribuído: **G16 — [comm-f2f-Resistance](https://snap.stanford.edu/data
 | Códigos e scripts | `src/`, `scripts/` |
 | Conjunto de dados tratado | `data/processed/` |
 | README explicando a execução | Este arquivo, "Como executar" |
-| Descrição do grafo original | Relatório, Seção 4 |
+| Descrição do grafo original | Relatório, Seção 4 (tabela do dataset e figura do dado bruto ao longo da partida) |
 | Tratamento realizado | Relatório, Seção 5 (Tabela de evolução e figura do limiar de atenção); `src/tratamento.py` |
 | Metodologia | Relatório, Seção 6 |
 | Parte I: todas as medidas + tabela "computadas ou não" | Relatório, Seção 7.1 (tabela de métricas com colunas "Computada?" e "Método") |
 | Parte I: visualização do grafo | Relatório, Figuras 1 e 3; `figures/grafo_completo.png` |
 | Parte II: os 8 grupos de algoritmos | Relatório, Seção 7.2; `src/algoritmos.py` |
-| Parte II: complexidade teórica e observada; média, desvio e IC (Z se n ≥ 30, t se n < 30) | Relatório, tabelas de tempos e de escala; `src/benchmark.py`, `src/parte2.py` |
+| Parte II: complexidade teórica e observada; média, desvio e IC (Z se n ≥ 30, t se n < 30) | Relatório, tabelas de tempos e de escala (V de 58 a ~29 mil, com réplicas das partidas); `src/benchmark.py`, `src/parte2.py` |
 | Parte III.1: small-world (código próprio), faz sentido?, implicação prática | Relatório, Seção 7.3; `src/propriedades.py` |
-| Parte III.2: lei de potência | Relatório, Seção 7.3 (regressão, CCDF e máxima verossimilhança) |
-| Parte III.3: robustez aleatória e direcionada (boxplot, métricas A a D) | Relatório, Seção 7.3 (figura de robustez) |
+| Parte III.2: lei de potência | Relatório, Seção 7.3 (regressão, CCDF, máxima verossimilhança e testes de aderência à Poisson e à binomial por partida) |
+| Parte III.3: robustez aleatória e direcionada (boxplot, métricas A a D, r = ⌈0,05·n⌉) | Relatório, Seção 7.3 (figuras de robustez e da curva S(f) até 30%) |
 | Parte III.4: descoberta mais interessante | Relatório, Seção 7.3 |
 | Extra: modelos clássicos (ER, BA, WS) | Relatório, Seção 7.3 (tabela e CCDF dos graus) |
-| Discussão crítica e conclusão | Relatório, Seções 8 e 9 |
+| Discussão crítica e conclusão | Relatório, Seções 8 e 9 (inclui a sensibilidade ao limiar de atenção) |
 | Template WebMedia; PDF com o número da matrícula | `relatorio/main.tex`; `relatorio/224215945.pdf` |
 
 ## Estrutura
@@ -52,6 +52,7 @@ data/processed/        dados tratados (CSV) usados nas análises
   arestas.csv            951 arestas não-direcionadas (atenção e distância)
   partidas.csv           metadados das 62 partidas
   atencao_pares.csv      atenção f(u, v) de todos os 2.870 pares ordenados, antes do limiar
+  serie_temporal.csv     laptop e foco da atenção ao longo de cada partida (20 faixas de tempo)
   etapas_tratamento.json evolução do grafo ao longo do tratamento
 src/
   tratamento.py        dados brutos -> grafo estático tratado
@@ -61,6 +62,7 @@ src/
                        Tarjan (SCC e pontes/articulações), Prim, Kruskal
   metricas.py          métricas estruturais
   propriedades.py      small-world, lei de potência, centralidades, robustez e modelos
+  sensibilidade.py     medidas principais refeitas para outros limiares de atenção
   benchmark.py         tempo real: média, desvio e IC 95% (Z ou t-Student)
   comum.py             caminhos, estilo dos gráficos e carga do grafo tratado
   parte1.py            Parte I  (python -m src.parte1)
@@ -112,27 +114,30 @@ determinísticos (sementes fixas).
 
 | Algoritmo | Complexidade | Média (ms) | IC 95% (ms) |
 |---|---|---:|---|
-| BFS | O(V+E) | 0,30 | [0,22; 0,38] |
-| DFS | O(V+E) | 0,69 | [0,41; 0,97] |
-| Eulerianidade | O(V+E) | 0,07 | [0,06; 0,09] |
-| Dijkstra (todas as fontes) | O(V(V+E) log V) | 3,6 | [3,3; 3,9] |
-| Bellman-Ford (todas as fontes) | O(V²E) | 443 | [378; 508] |
-| Floyd-Warshall (Python, com poda) | O(V³) | 70 | [69; 71] (t-Student, n = 10) |
-| Floyd-Warshall (numpy, sem poda) | O(V³) | 490 | [350; 630] (t-Student, n = 10) |
-| Tarjan (SCC, dirigido) | O(V+E) | 0,69 | [0,64; 0,74] |
-| Tarjan (pontes e articulações) | O(V+E) | 0,79 | [0,74; 0,85] |
-| Prim | O(E log V) | 0,56 | [0,47; 0,65] |
-| Kruskal | O(E log V) | 1,03 | [0,92; 1,15] |
+| BFS | O(V+E) | 0,31 | [0,21; 0,42] |
+| DFS | O(V+E) | 0,48 | [0,34; 0,62] |
+| Eulerianidade | O(V+E) | 0,09 | [0,06; 0,12] |
+| Dijkstra (todas as fontes) | O(V(V+E) log V) | 3,3 | [3,0; 3,5] |
+| Bellman-Ford (todas as fontes) | O(V²E) | 384 | [328; 440] |
+| Floyd-Warshall (Python, com poda) | O(V³) | 82 | [72; 93] (t-Student, n = 10) |
+| Floyd-Warshall (numpy, sem poda) | O(V³) | 350 | [246; 453] (t-Student, n = 10) |
+| Tarjan (SCC, dirigido) | O(V+E) | 0,71 | [0,69; 0,74] |
+| Tarjan (pontes e articulações) | O(V+E) | 0,78 | [0,76; 0,81] |
+| Prim | O(E log V) | 0,53 | [0,51; 0,55] |
+| Kruskal | O(E log V) | 0,89 | [0,86; 0,93] |
 
 - Dijkstra, Bellman-Ford e Floyd-Warshall produzem distâncias idênticas nos 2.870 pares alcançáveis.
-- Floyd-Warshall vetorizado com numpy é ~7× **mais lento** que o puro: sem poda, faz sempre as
+- Floyd-Warshall vetorizado com numpy é ~4× **mais lento** que o puro: sem poda, faz sempre as
   V³ ≈ 9×10⁷ operações, enquanto a versão pura ignora intermediários inalcançáveis (cada vértice
   só alcança a própria partida).
 - Tarjan: 131 SCCs (uma não-trivial por partida); apenas 3 pontes e 3 articulações em todo o grafo.
 - Prim e Kruskal: floresta geradora mínima com 389 arestas (uma árvore por partida) e mesmo peso.
-- **Complexidade observada** (subgrafos de 58 a 451 vértices, ajuste log-log): expoente ≈ 1
-  para os algoritmos lineares; Dijkstra e Bellman-Ford de todas as fontes e Floyd-Warshall
-  crescem um grau de V abaixo do pior caso, porque cada fonte só alcança a própria partida.
+- **Complexidade observada** (ajuste log-log, V de 58 a 28.753): até 62 partidas, as partidas
+  reais; acima disso, réplicas de partidas sorteadas com reposição, que estendem a faixa para
+  mais de duas ordens de grandeza sem mudar o tipo de grafo. Expoente b entre 1,07 e 1,11 para
+  os algoritmos lineares e de 0,97 a 1,00 para Prim e Kruskal; Dijkstra e Bellman-Ford de todas
+  as fontes e Floyd-Warshall com poda crescem um grau de V abaixo do pior caso, porque cada fonte
+  só alcança a própria partida. Medições com aquecimento e coletor de lixo desligado.
 
 ![Complexidade observada](figures/escala.png)
 
@@ -141,13 +146,15 @@ determinísticos (sementes fixas).
 | Pergunta | Resposta |
 |---|---|
 | Small-world? | **Só aparentemente.** Contra um G(n,m) global, σ ≈ 301; contra um aleatório que respeita as partidas, σ ≈ 1,14 e L é o mesmo (1,34). Os caminhos curtos vêm do tamanho dos grupos (≤ 8 pessoas). |
-| Lei de potência? | **Não.** A regressão log-log tem inclinação positiva (R² = 0,46); o ajuste por máxima verossimilhança discreto exato (zeta de Hurwitz) dá γ = 5,88 ± 0,38 numa cauda de só 3 valores de k, com KS = 0,13. A distribuição é subdispersa (Var(k) = 2,0 < ⟨k⟩ = 4,2), próxima de uma Poisson. |
-| Robusta à remoção aleatória de 5%? | **Sim.** 95,1% dos vértices continuam no núcleo conexo da sua partida (o máximo possível é 95,1%). |
-| Robusta à remoção dos 5% mais centrais? | **Sim.** Por grau, betweenness e PageRank, a fração no núcleo cai só para 94,5%, 93,3% e 94,2%: não há hubs (k ≤ 7) e quase nenhuma partida tem vértice de corte. |
-| Descoberta mais interessante | A estrutura global é inteiramente explicada pela divisão em partidas; a informação está na direção das arestas (só 46,7% dos arcos são recíprocos e 13,7% dos participantes não recebem atenção acima do uniforme). |
+| Lei de potência? | **Não.** A regressão log-log tem inclinação positiva (R² = 0,46); o ajuste por máxima verossimilhança discreto exato (zeta de Hurwitz) dá γ = 5,88 ± 0,38 numa cauda de só 3 valores de k, com KS = 0,13. A distribuição é subdispersa (Var(k) = 2,0 < ⟨k⟩ = 4,2): mais próxima de uma Poisson, mas os testes de dispersão e χ² rejeitam a Poisson (p < 10⁻¹⁵) e também a mistura de binomiais por partida (p ≈ 3×10⁻⁹); os graus são ainda mais homogêneos. |
+| Robusta à remoção aleatória de 5%? | **Sim.** Com r = ⌈0,05·451⌉ = 23, 94,9% dos vértices continuam no núcleo conexo da sua partida (o máximo possível é 94,9%). |
+| Robusta à remoção dos 5% mais centrais? | **Sim.** Por grau, betweenness e PageRank, a fração no núcleo cai só para 94,2%, 93,1% e 94,0%: não há hubs (k ≤ 7) e quase nenhuma partida tem vértice de corte. Até 30% removidos, a queda é gradual (54,5% no núcleo no pior ataque, contra 68,6% ao acaso), mas os isolados chegam a 18%. |
+| Descoberta mais interessante | A estrutura global é inteiramente explicada pela divisão em partidas, para qualquer limiar testado (σ contra o aleatório por partidas entre 0,98 e 1,39); a informação está na direção das arestas (só 46,7% dos arcos são recíprocos e 13,7% dos participantes não recebem atenção acima do uniforme). |
 | Extra: modelo clássico | Nenhum globalmente (BA cria hubs, ER e WS são conexos com caminhos longos); cada partida se aproxima de um Erdős–Rényi denso (p ≈ 0,67). |
 
 ![Robustez](figures/robustez.png)
+
+![Curva de remoção](figures/robustez_curva.png)
 
 ## Como executar
 
@@ -184,7 +191,7 @@ cd relatorio && pdflatex main.tex && pdflatex main.tex
 - Versões das dependências fixadas em `requirements.txt`.
 - `scripts/verificar_dados.py` confere o download com o SNAP (62 partidas, 451 participantes,
   3.126.993 arestas temporais); `tests/` confere o tratamento e cada algoritmo próprio com o
-  NetworkX (`python -m pytest`, 64 testes, um arquivo por módulo).
+  NetworkX (`python -m pytest`, 70 testes, um arquivo por módulo).
 - Figuras gravadas sem data nos metadados e com ordem de vértices fixa: redesenhar não
   altera os arquivos versionados.
 

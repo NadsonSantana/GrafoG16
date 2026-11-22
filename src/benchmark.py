@@ -1,5 +1,6 @@
 """Medição de tempo real com média, desvio padrão e intervalo de confiança de 95%."""
 
+import gc
 import math
 import statistics
 import time
@@ -23,15 +24,25 @@ def intervalo_confianca(amostras, confianca=0.95):
 
 
 def medir(funcao, repeticoes, aquecimento=1):
-    """Executa a função 'repeticoes' vezes (após aquecimento) e devolve (resultado, estatísticas)."""
+    """Executa a função 'repeticoes' vezes (após aquecimento) e devolve (resultado, estatísticas).
+
+    O coletor de lixo fica desligado durante a cronometragem, para que uma coleta
+    disparada por alocações anteriores não caia dentro de uma repetição."""
     resultado = None
     for _ in range(aquecimento):
         resultado = funcao()
     tempos = []
-    for _ in range(repeticoes):
-        inicio = time.perf_counter()
-        resultado = funcao()
-        tempos.append(time.perf_counter() - inicio)
+    gc.collect()
+    ligado = gc.isenabled()
+    gc.disable()
+    try:
+        for _ in range(repeticoes):
+            inicio = time.perf_counter()
+            resultado = funcao()
+            tempos.append(time.perf_counter() - inicio)
+    finally:
+        if ligado:
+            gc.enable()
     estatisticas = intervalo_confianca(tempos)
     estatisticas["mediana"] = statistics.median(tempos)
     return resultado, estatisticas

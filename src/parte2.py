@@ -5,6 +5,7 @@ de cada ponto, robusta a execuções atípicas; média, desvio e IC 95% também 
 Uso: python -m src.parte2 [--rapido | --so-figuras]"""
 
 import math
+import random
 
 import numpy as np
 
@@ -64,7 +65,7 @@ def parte2(g, d, rapido=False):
         "bfs_visitados": len(saidas["BFS"]),
         "dfs_visitados": len(saidas["DFS"]),
         "euler_global": saidas["Eulerianidade"],
-        "euler_por_partida": {t: euler_por_partida.count(t) for t in set(euler_por_partida)},
+        "euler_por_partida": {t: euler_por_partida.count(t) for t in sorted(set(euler_por_partida))},
         "pares_alcancaveis": len(finitos),
         "distancia_media": float(np.mean(finitos)),
         "distancia_max": float(max(finitos)),
@@ -134,25 +135,55 @@ FUNCOES = {
 }
 
 
-def parte2_escala(g, d, rapido=False):
-    """Complexidade observada: cada algoritmo é medido em subgrafos formados pela união
-    das k primeiras partidas (V cresce de ~60 a 451) e ajusta-se log(tempo) ~ b log f(V, E)."""
-    partidas = sorted({v.split("_")[0] for v in g.adj})
-    ks = [8, 16, 24, 32, 40, 48, 56, 62] if not rapido else [16, 62]
+# número de partidas de cada ponto do experimento de escala: até 62 são as primeiras
+# partidas reais; acima disso, as 62 reais mais cópias de partidas sorteadas com reposição
+PARTIDAS_ESCALA = [8, 16, 31, 62, 124, 248, 496, 992, 1984, 3968]
+LIMITE_PARTIDAS = {"Bellman-Ford*": 124, "Floyd-Warshall": 248, "Floyd-Warshall (numpy)": 124}
+REPETICOES_REDUZIDAS = ("Bellman-Ford*", "Floyd-Warshall", "Floyd-Warshall (numpy)")
+
+
+def replicar_partidas(g, d, quantidade, rng):
+    """União de 'quantidade' partidas, nas versões não-direcionada e dirigida.
+
+    Até 62, usa as primeiras partidas reais. Acima disso, acrescenta às 62 reais cópias de
+    partidas sorteadas com reposição, com vértices renomeados (cXXXXX_pY). Cada cópia
+    preserva a estrutura e os pesos de uma partida real, de modo que V e E crescem
+    mantendo o tipo de grafo analisado."""
+    partidas = {}
+    for v in g.adj:
+        partidas.setdefault(v.split("_")[0], []).append(v)
+    nomes = sorted(partidas)
+    if quantidade <= len(nomes):
+        vs = [v for p in nomes[:quantidade] for v in partidas[p]]
+        return g.subgrafo(vs), d.subgrafo(vs)
+    h, hd = g.subgrafo(list(g.adj)), d.subgrafo(list(d.adj))
+    for j in range(quantidade - len(nomes)):
+        p = rng.choice(nomes)
+        novo = {v: f"c{j:05d}_{v.split('_', 1)[1]}" for v in partidas[p]}
+        for u in partidas[p]:
+            h.adj[novo[u]] = {novo[v]: w for v, w in g.adj[u].items()}
+            hd.adj[novo[u]] = {novo[v]: w for v, w in d.adj[u].items()}
+    return h, hd
+
+
+def parte2_escala(g, d, rapido=False, semente=42):
+    """Complexidade observada: cada algoritmo é medido em grafos com 8 a 3.968 partidas
+    (V de ~60 a ~29 mil), e ajusta-se log(tempo) ~ b log f(V, E) e log(tempo) ~ a log V."""
+    rng = random.Random(semente)
+    tamanhos = [16, 62, 124] if rapido else PARTIDAS_ESCALA
     linhas = []
-    for k in ks:
-        escolhidas = set(partidas[:k])
-        vs = [v for v in g.adj if v.split("_")[0] in escolhidas]
-        sub_g, sub_d = g.subgrafo(vs), d.subgrafo(vs)
+    for k in tamanhos:
+        sub_g, sub_d = replicar_partidas(g, d, k, rng)
         for nome, (_, f, dirigido) in TEORICA.items():
+            if k > LIMITE_PARTIDAS.get(nome, math.inf):
+                continue
             h = sub_d if dirigido else sub_g
-            n = 3 if rapido else (10 if nome in ("Bellman-Ford*", "Floyd-Warshall",
-                                                  "Floyd-Warshall (numpy)") else 30)
+            n = 3 if rapido else (10 if nome in REPETICOES_REDUZIDAS else 30)
             _, est = medir(lambda: FUNCOES[nome](h), n)
             v_, e_ = h.num_vertices(), h.num_arestas()
-            linhas.append({"algoritmo": nome, "partidas": k, "V": v_, "E": e_,
+            linhas.append({"algoritmo": nome, "partidas": k, "real": k <= 62, "V": v_, "E": e_,
                            "f_teorica": f(v_, e_), **est})
-        print(f"  escala: {k} partidas ({len(vs)} vértices)")
+        print(f"  escala: {k} partidas ({sub_g.num_vertices()} vértices)")
     ajuste = {}
     for nome, (rotulo, _, _) in TEORICA.items():
         pts = [x for x in linhas if x["algoritmo"] == nome]
@@ -161,45 +192,68 @@ def parte2_escala(g, d, rapido=False):
         b, _ = np.polyfit(x, y, 1)
         xv = np.log([p["V"] for p in pts])
         a, _ = np.polyfit(xv, y, 1)
+        # curva teórica c * f(V, E) (inclinação fixa em 1 na escala log)
+        log_c = float(np.mean(y - x))
+        r2_c = 1 - float(np.sum((y - x - log_c) ** 2) / np.sum((y - y.mean()) ** 2))
         ajuste[nome] = {"complexidade": rotulo, "expoente": float(b),
                         "r2": float(np.corrcoef(x, y)[0, 1] ** 2),
-                        "expoente_v": float(a), "r2_v": float(np.corrcoef(xv, y)[0, 1] ** 2)}
+                        "expoente_v": float(a), "r2_v": float(np.corrcoef(xv, y)[0, 1] ** 2),
+                        "log_c": log_c, "r2_teorica": r2_c,
+                        "v_min": min(p["V"] for p in pts), "v_max": max(p["V"] for p in pts)}
     salvar_json("parte2_escala.json", {"linhas": linhas, "ajuste": ajuste})
-    figura_escala(linhas)
+    figura_escala(linhas, ajuste)
     return ajuste
 
 
-def figura_escala(linhas):
-    cores = [AZUL, LARANJA, AQUA, "#eda100", "#e87ba4", "#008300", "#008300", "#4a3aa7",
-             "#4a3aa7", VERMELHO, TINTA_2]
-    marcadores = ["o", "s", "^", "D", "v", "P", "+", "X", "x", "<", ">"]
-    fig, ax = plt.subplots(figsize=(3.3, 3.4))
-    for (nome, cor, mk) in zip(TEORICA, cores, marcadores):
-        pts = [x for x in linhas if x["algoritmo"] == nome]
+def figura_escala(linhas, ajuste):
+    """Um painel por algoritmo: tempo médio (IC 95%) contra V em log-log e a curva
+    teórica c * f(V, E) ajustada. Marcadores cheios: partidas reais; vazios: réplicas."""
+    fig, eixos = plt.subplots(3, 4, figsize=(7.0, 5.4))
+    eixos = eixos.ravel()
+    for ax, nome in zip(eixos, TEORICA):
+        pts = sorted((x for x in linhas if x["algoritmo"] == nome), key=lambda p: p["V"])
+        vs = np.array([p["V"] for p in pts])
         medias = np.array([p["media"] * 1000 for p in pts])
-        erros = [medias - np.array([max(p["ic_inf"], 1e-9) * 1000 for p in pts]),
-                 np.array([p["ic_sup"] * 1000 for p in pts]) - medias]
-        ax.errorbar([p["V"] for p in pts], medias, yerr=erros, marker=mk, color=cor,
-                    markersize=4, linewidth=1.5, elinewidth=0.8, capsize=2, label=nome)
-    ax.set_xscale("log")
-    ax.set_yscale("log")
-    todas = [p["media"] * 1000 for p in linhas]
-    ax.set_ylim(min(todas) / 3, max(todas) * 3)  # ICs com limite inferior <= 0 ficam cortados
-    vs = sorted({p["V"] for p in linhas})
-    marcas = [vs[0], vs[1], vs[3], vs[-1]]  # aproximadamente equidistantes em log
-    ax.set_xticks(marcas, [str(v) for v in marcas])
-    ax.xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
-    ax.set_xlabel("vértices $V$ do subgrafo (log)")
-    ax.set_ylabel("tempo médio (ms, log)")
-    ax.legend(fontsize=6, ncol=3, loc="upper center", bbox_to_anchor=(0.5, -0.2))
-    ax.set_title("barras: IC 95% de cada ponto", fontsize=7, color=TINTA_2)
+        inf = np.array([max(p["ic_inf"], p["media"] * 1e-3) * 1000 for p in pts])
+        sup = np.array([p["ic_sup"] * 1000 for p in pts])
+        ax.errorbar(vs, medias, yerr=[medias - inf, sup - medias], fmt="none", ecolor=AZUL,
+                    elinewidth=0.8, capsize=1.5)
+        reais = np.array([p["real"] for p in pts])
+        ax.plot(vs[reais], medias[reais], "o", color=AZUL, markersize=3.5)
+        ax.plot(vs[~reais], medias[~reais], "o", markerfacecolor="white", color=AZUL,
+                markersize=3.5)
+        a = ajuste[nome]
+        teorica = np.exp(a["log_c"]) * np.array([p["f_teorica"] for p in pts]) * 1000
+        ax.plot(vs, teorica, "--", color=LARANJA, linewidth=1.2)
+        ax.set_xscale("log")
+        ax.set_yscale("log")
+        ax.set_title(f"{nome}\n$f={a['complexidade']}$, $b={a['expoente']:.2f}$".replace(".", ","),
+                     fontsize=6.5)
+        ax.tick_params(labelsize=6)
+        ax.grid(which="minor", visible=False)
+    for ax in eixos[8:11]:
+        ax.set_xlabel("$V$ (log)", fontsize=7)
+    for ax in eixos[::4]:
+        ax.set_ylabel("tempo (ms, log)", fontsize=7)
+    legenda = eixos[-1]
+    legenda.axis("off")
+    legenda.legend(handles=[
+        plt.Line2D([], [], color=AZUL, marker="o", linestyle="", markersize=4,
+                   label="partidas reais"),
+        plt.Line2D([], [], color=AZUL, marker="o", markerfacecolor="white", linestyle="",
+                   markersize=4, label="réplicas das partidas"),
+        plt.Line2D([], [], color=AZUL, marker="|", linestyle="", markersize=8, label="IC 95%"),
+        plt.Line2D([], [], color=LARANJA, linestyle="--", label="$c \\cdot f(V, E)$ ajustada"),
+    ], loc="center", fontsize=7)
+    fig.tight_layout(h_pad=0.6, w_pad=0.4)
     salvar_figura(fig, "escala")
 
 
 def figuras():
     """Redesenha as figuras da Parte II a partir dos JSONs de results/."""
     figura_tempos(ler_json("parte2_tempos.json"))
-    figura_escala(ler_json("parte2_escala.json")["linhas"])
+    escala = ler_json("parte2_escala.json")
+    figura_escala(escala["linhas"], escala["ajuste"])
 
 
 def main():

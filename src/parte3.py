@@ -7,6 +7,7 @@ import numpy as np
 
 from . import algoritmos as alg
 from . import propriedades as prop
+from .sensibilidade import sensibilidade_limiar
 from .comum import (AQUA, AZUL, LARANJA, TINTA, TINTA_2, VERMELHO, carregar, eixo_graus_log,
                     ler_json, plt, preparar, salvar_figura, salvar_json, so_figuras)
 
@@ -16,15 +17,19 @@ def parte3(g, d, rapido=False):
     reps = 5 if rapido else 30
     sw = prop.small_world(g, blocos, repeticoes=reps)
     lp = prop.lei_de_potencia(g)
+    lp["aderencia"] = prop.aderencia_graus(g, blocos)
     rob = prop.robustez(g, repeticoes=reps, dirigido=d)
     modelos = prop.comparar_modelos(g, repeticoes=3 if rapido else 10)
     por_partida = small_world_por_partida(g, blocos)
+    sens = sensibilidade_limiar(repeticoes=3 if rapido else 10)
     salvar_json("parte3_small_world.json", {"global": sw, "por_partida": por_partida})
     salvar_json("parte3_lei_potencia.json", lp)
     salvar_json("parte3_robustez.json", rob)
     salvar_json("parte3_modelos.json", modelos)
+    salvar_json("parte3_sensibilidade.json", sens)
     figura_lei_potencia(lp)
     figura_robustez(rob)
+    figura_curva_remocao(rob["curva"])
     figura_modelos(modelos["ccdf_graus"])
     return sw, lp, rob, modelos
 
@@ -124,10 +129,38 @@ def figura_robustez(rob):
     salvar_figura(fig, "robustez")
 
 
+def figura_curva_remocao(curva):
+    """S(f): fração no núcleo da partida (A) e fração de isolados (D) em função da fração
+    removida, para a remoção aleatória (média ± desvio) e os ataques de ranking fixo."""
+    fs = np.array(curva["fracoes"]) * 100
+    estilos = {"grau": (VERMELHO, "D", "grau"), "betweenness": (LARANJA, "^", "betweenness"),
+               "pagerank": (AQUA, "s", "PageRank")}
+    fig, eixos = plt.subplots(1, 2, figsize=(6.4, 2.5))
+    for ax, (chave_al, chave_at, rotulo) in zip(
+            eixos, [("A", "A", "A: fração no núcleo da partida"), ("D", "D", "D: fração de isolados")]):
+        media = np.array([x[f"{chave_al}_media"] for x in curva["aleatoria"]])
+        dp = np.array([x[f"{chave_al}_dp"] for x in curva["aleatoria"]])
+        ax.fill_between(fs, media - dp, media + dp, color=AZUL, alpha=0.2, linewidth=0)
+        ax.plot(fs, media, "o-", color=AZUL, markersize=3.5, linewidth=1.8, label="aleatória (média ± dp)")
+        for nome, (cor, mk, rot) in estilos.items():
+            ax.plot(fs, [x[chave_at] for x in curva["ataques"][nome]], marker=mk, color=cor,
+                    markersize=3.5, linewidth=1.2, label=f"ataque por {rot}")
+        if chave_al == "A":
+            ax.plot(fs, 1 - fs / 100, ":", color=TINTA_2, linewidth=1, label="limite $1 - f$")
+        ax.set_xlabel("vértices removidos $f$ (%)")
+        ax.set_title(rotulo, fontsize=8)
+        ax.set_xticks(fs[::2])
+    eixos[0].legend(fontsize=6, loc="lower left")
+    fig.tight_layout()
+    salvar_figura(fig, "robustez_curva")
+
+
 def figuras():
     """Redesenha as figuras da Parte III a partir dos JSONs de results/."""
     figura_lei_potencia(ler_json("parte3_lei_potencia.json"))
-    figura_robustez(ler_json("parte3_robustez.json"))
+    rob = ler_json("parte3_robustez.json")
+    figura_robustez(rob)
+    figura_curva_remocao(rob["curva"])
     figura_modelos(ler_json("parte3_modelos.json")["ccdf_graus"])
 
 

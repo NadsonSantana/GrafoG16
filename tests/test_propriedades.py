@@ -52,3 +52,13 @@ def test_melhor_kmin_exige_cauda_nao_degenerada():
     graus = np.array([1.0] * 100 + [2.0] * 60 + [3.0] * 50 + [4.0] * 40)
     r = prop.melhor_kmin(graus, cauda_minima=50, valores_minimos=3)
     assert r["kmin"] <= 2
+
+
+def test_aderencia_reconhece_poisson():
+    # grafo G(n, m) grande: graus ~ Poisson, sem subdispersão
+    g = prop.gerar_erdos_renyi(3000, 6000, random.Random(1))
+    ad = prop.aderencia_graus(g, [list(g.adj)])
+    assert ad["indice_dispersao"] == pytest.approx(1, abs=0.1)
+    assert ad["poisson"]["p"] > 0.001
+    assert sum(ad["observados"]) == 3000
+    assert sum(ad["esperados_binomial"]) == pytest.approx(3000)
