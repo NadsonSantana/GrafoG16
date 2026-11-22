@@ -33,9 +33,10 @@ src/
   metricas.py          métricas estruturais (Parte I)
   propriedades.py      small-world, lei de potência, robustez e modelos (Parte III)
   benchmark.py         tempo real: média, desvio e IC 95% (Z ou t-Student)
-  executar.py          executa todas as análises e gera resultados/figuras
+  executar.py          executa todas as análises (inclui o experimento de escala da Parte II)
+  tabelas.py           gera as tabelas LaTeX e macros do relatório a partir dos JSONs
 tests/                 testes (NetworkX usado apenas como oráculo)
-results/               resultados em JSON
+results/               resultados em JSON, tabelas tab_*.tex e macros valores.tex
 figures/               figuras do relatório
 relatorio/             relatório em LaTeX (template WebMedia) e PDF
 scripts/baixar_dados.sh  download do dataset original
@@ -63,7 +64,11 @@ python3 -m venv .venv
 .venv/bin/python -m src.tratamento   # regenera data/processed/
 .venv/bin/python -m pytest           # testes
 .venv/bin/python -m src.executar     # análises completas (~1 min); --rapido para teste
+.venv/bin/python -m src.tabelas      # só regenera as tabelas do relatório a partir dos JSONs
 ```
+
+O relatório inclui as tabelas de `results/` com `\input` e os valores citados no texto
+por macros (`results/valores.tex`). Assim, após uma nova execução, basta recompilar o PDF.
 
 Os dados tratados já estão versionados; o download só é necessário para refazer o tratamento.
 

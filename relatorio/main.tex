@@ -4,6 +4,7 @@
 \usepackage{booktabs}
 
 \usepackage{adjustbox}
+\input{../results/valores.tex}
 \usepackage{listings}
 \usepackage{xurl}
 \hypersetup{urlcolor=black}
@@ -76,6 +77,7 @@ considerando $i = 129$ quando o resultado é 0. A Tabela~\ref{tab:matricula} apl
 \begin{table}[h]
   \caption{Cálculo do grafo a partir da matrícula $M = 224215945$.}
   \label{tab:matricula}
+  \begin{adjustbox}{max width=\columnwidth}
   \begin{tabular}{lr}
     \toprule
     Passo & Valor \\
@@ -88,6 +90,7 @@ considerando $i = 129$ quando o resultado é 0. A Tabela~\ref{tab:matricula} apl
     $i = 1564 \bmod 129$ & \textbf{16} \\
     \bottomrule
   \end{tabular}
+  \end{adjustbox}
 \end{table}
 
 Como $i = 16 \neq 0$, o grafo atribuído é o \textbf{G16 -- comm-f2f-Resistance}, da categoria \textit{Social networks} da coleção SNAP~\cite{snap}: uma rede ponderada, dirigida e temporal com 451 vértices e 3.126.993 arestas temporais. A regra foi conferida com os dois exemplos da especificação: a matrícula 225216327 resulta em $(30 \times 28) \bmod 129 = 66$ e a matrícula 2025000078, em $(24 \times 79) \bmod 129 = 90$.
@@ -159,17 +162,7 @@ A Tabela~\ref{tab:etapas} mostra a evolução do grafo ao longo do tratamento.
   \caption{Evolução do grafo ao longo dos tratamentos aplicados.}
   \label{tab:etapas}
   \begin{adjustbox}{max width=\columnwidth}
-  \begin{tabular}{lrr}
-    \toprule
-    Etapa & Vértices & Arestas \\
-    \midrule
-    Grafo temporal bruto (com laptop) & 451 & 3.126.993 \\
-    Sem laptop & 451 & 2.929.953 \\
-    Estático (pares que ocorrem) & 451 & 2.867 arcos \\
-    Após limiar $f \geq 1/N$ & 451 & 1.241 arcos \\
-    Não-direcionado (final) & 451 & 951 \\
-    \bottomrule
-  \end{tabular}
+  \input{../results/tab_etapas.tex}
   \end{adjustbox}
 \end{table}
 
@@ -203,30 +196,10 @@ Os resultados estão divididos em três partes: a análise estrutural obrigatór
 A Tabela~\ref{tab:metricas} apresenta as métricas estruturais do grafo tratado. Todas foram computadas, e de forma exata.
 
 \begin{table}[h]
-  \caption{Métricas estruturais do grafo tratado. Todas foram computadas de forma exata (nenhuma por amostragem).}
+  \caption{Métricas estruturais do grafo tratado e método de cálculo. Todas foram computadas; nenhuma por amostragem.}
   \label{tab:metricas}
   \begin{adjustbox}{max width=\columnwidth}
-  \begin{tabular}{lrc}
-    \toprule
-    Métrica & Valor & Computada \\
-    \midrule
-    Número de vértices & 451 & sim \\
-    Número de arestas & 951 & sim \\
-    Grau mínimo / máximo & 1 / 7 & sim \\
-    Grau médio & 4,2173 & sim \\
-    Densidade & $9{,}37 \times 10^{-3}$ & sim \\
-    Densidade média intra-partida & 0,6702 & sim \\
-    Número de componentes & 62 & sim \\
-    Tamanho das componentes & 5 a 8 & sim \\
-    Tamanho da LCC & 8 & sim \\
-    Diâmetro (LCC / máx. componentes) & 2 / 3 & sim \\
-    Raio (LCC / mín. componentes) & 1 / 1 & sim \\
-    Comprimento médio (LCC / global) & 1,2857 / 1,3401 & sim \\
-    Coef. de clusterização médio & 0,7541 & sim \\
-    Número de triângulos & 791 & sim \\
-    Visualização & Fig.~\ref{fig:teaser} e \ref{fig:partida0} & sim \\
-    \bottomrule
-  \end{tabular}
+  \input{../results/tab_metricas.tex}
   \end{adjustbox}
 \end{table}
 
@@ -271,22 +244,7 @@ A Tabela~\ref{tab:tempos} e a Figura~\ref{fig:tempos} comparam a complexidade te
 \begin{table*}[t]
   \caption{Complexidade teórica e tempo real observado (em milissegundos), com IC de 95\%. $V = 451$, $E = 951$ (1.241 arcos no Tarjan).}
   \label{tab:tempos}
-  \begin{tabular}{llrrrc}
-    \toprule
-    Algoritmo & Complexidade & $n$ & Média (ms) & Desvio (ms) & IC 95\% (ms) \\
-    \midrule
-    BFS (varredura completa) & $O(V+E)$ & 50 & 0,252 & 0,247 & [0,184; 0,321] \\
-    DFS (varredura completa) & $O(V+E)$ & 50 & 0,369 & 0,144 & [0,329; 0,409] \\
-    Eulerianidade & $O(V+E)$ & 50 & 0,094 & 0,242 & [0,027; 0,161] \\
-    Dijkstra (todas as fontes) & $O(V(V+E)\log V)$ & 50 & 4,801 & 5,136 & [3,377; 6,225] \\
-    Bellman-Ford (todas as fontes) & $O(V^2E)$ & 30 & 512,751 & 255,586 & [421,293; 604,210] \\
-    Floyd-Warshall & $O(V^3)$ & 10 & 95,384 & 37,860 & [68,301; 122,468]* \\
-    Tarjan & $O(V+E)$ & 50 & 0,921 & 1,130 & [0,608; 1,234] \\
-    Prim & $O(E\log V)$ & 50 & 0,698 & 0,548 & [0,546; 0,850] \\
-    Kruskal & $O(E\log V)$ & 50 & 1,294 & 0,802 & [1,072; 1,516] \\
-    \bottomrule
-    \multicolumn{6}{l}{\footnotesize * IC calculado com distribuição t-Student ($n = 10$, 9 graus de liberdade); os demais, com distribuição Normal ($n \geq 30$).}
-  \end{tabular}
+  \input{../results/tab_tempos.tex}
 \end{table*}
 
 \begin{figure}[h]
@@ -296,7 +254,29 @@ A Tabela~\ref{tab:tempos} e a Figura~\ref{fig:tempos} comparam a complexidade te
   \label{fig:tempos}
 \end{figure}
 
-Os algoritmos lineares ficam abaixo de 1,5 ms. Bellman-Ford a partir de todas as fontes é o mais lento: cada execução percorre os 1.902 arcos da lista global em cada rodada, inclusive arcos de partidas inalcançáveis a partir da fonte. Floyd-Warshall, mesmo sendo $O(V^3) \approx 9{,}2 \times 10^7$ no pior caso, foi 5 vezes mais rápido que Bellman-Ford graças à poda de intermediários inalcançáveis. Os desvios relativamente altos se devem ao ruído do sistema operacional em medições de submilissegundos.
+No grafo completo, os algoritmos lineares levam no máximo \tempoMaxLinear{} ms. Bellman-Ford a partir de todas as fontes é o mais lento (\tempoBF{} ms): cada execução percorre os 1.902 arcos da lista global em cada rodada, inclusive arcos de partidas inalcançáveis a partir da fonte. Floyd-Warshall, mesmo sendo $O(V^3) \approx 9{,}2 \times 10^7$ no pior caso, levou \tempoFW{} ms, \razaoBFFW{} vezes menos que Bellman-Ford, graças à poda de intermediários inalcançáveis. Os desvios relativamente altos se devem ao ruído do sistema operacional em medições de submilissegundos.
+
+\subsubsection{Complexidade observada}
+Um único tamanho de grafo não permite verificar como o tempo \emph{cresce}. Por isso, repetimos as medições em subgrafos formados pela união das $k$ primeiras partidas, com $k \in \{8, 16, \dots, 56, 62\}$ ($V$ de 58 a 451), usando 30 execuções por ponto (10 para Bellman-Ford e Floyd-Warshall). Para cada algoritmo, ajustamos por mínimos quadrados em escala log-log o expoente $b$ de $\text{tempo} \propto f(V,E)^b$, onde $f$ é a função de complexidade teórica, e o expoente $a$ de $\text{tempo} \propto V^a$. Um valor $b \approx 1$ indica que o crescimento observado acompanha a teoria (Tabela~\ref{tab:escala} e Figura~\ref{fig:escala}).
+
+\begin{table}[h]
+  \caption{Ajuste da complexidade observada em subgrafos de 58 a 451 vértices.}
+  \label{tab:escala}
+  \begin{adjustbox}{max width=\columnwidth}
+  \input{../results/tab_escala.tex}
+  \end{adjustbox}
+\end{table}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.85\linewidth]{../figures/escala.pdf}
+  \caption{Tempo médio em função do número de vértices (escala log-log), por algoritmo. * indica execução a partir de todas as fontes.}
+  \label{fig:escala}
+\end{figure}
+
+\textbf{Lineares.} BFS, DFS e Tarjan apresentam $b$ entre \expMinLinear{} e \expMaxLinear{}, compatível com $O(V+E)$; Prim e Kruskal ficam em \expPrim{} e \expKruskal{}, compatível com $O(E\log V)$, já que o fator $\log V$ varia pouco nessa faixa. A verificação de Eulerianidade (\expEuler{}) tem custo tão pequeno que a sobrecarga fixa pesa no ajuste.
+
+\textbf{Todas as fontes e Floyd-Warshall.} Aqui o expoente $b$ fica bem abaixo de 1, e a explicação está na estrutura do grafo. Como cada partida é uma componente com no máximo 8 vértices, um Dijkstra a partir de uma fonte só explora a sua partida: o custo de todas as fontes cresce linearmente em $V$ ($a = \expVDijkstra$), e não quadraticamente. Bellman-Ford percorre a lista global de arcos por poucas rodadas para cada fonte, o que dá custo $\approx V \cdot E \propto V^2$ ($a = \expVBF$), e não $V^2E \propto V^3$. Floyd-Warshall com poda de intermediários inalcançáveis também cresce como $V^2$ ($a = \expVFW$), em vez de $V^3$ ($b = \expFW$). Ou seja, a complexidade teórica é um limite de pior caso; em um grafo particionado em blocos pequenos, o custo efetivo é menor por um fator de $V$.
 
 \subsection{Parte III: Análise de Propriedades da Rede}
 
@@ -307,24 +287,13 @@ Uma rede é \textit{small-world} quando $L \approx L_{rand}$ e $C \gg C_{rand}$,
   \caption{Comparação com grafos aleatórios equivalentes (média de 30 amostras).}
   \label{tab:sw}
   \begin{adjustbox}{max width=\columnwidth}
-  \begin{tabular}{lrrr}
-    \toprule
-    Métrica & Observado & $G(n,m)$ global & $G(n,m)$ por blocos \\
-    \midrule
-    Clusterização $C$ & 0,7541 & 0,0080 & 0,6599 \\
-    Comprimento médio $L$ & 1,3401 & 4,3851 & 1,3459 \\
-    Componentes & 62 & 5,6 & 62 \\
-    $C/C_{rand}$ & -- & 94,4 & 1,14 \\
-    $L/L_{rand}$ & -- & 0,31 & 1,00 \\
-    $\sigma$ & -- & \textbf{309,1} & \textbf{1,15} \\
-    \bottomrule
-  \end{tabular}
+  \input{../results/tab_smallworld.tex}
   \end{adjustbox}
 \end{table}
 
-Contra o aleatório global, o grafo pareceria fortemente \textit{small-world} ($\sigma = 309$). Essa conclusão, porém, é um artefato: o aleatório global ignora que as interações só podem ocorrer dentro de uma partida. Quando essa restrição é respeitada, $L$ coincide com o aleatório ($1{,}34$ contra $1{,}35$) e a clusterização é apenas 14\% maior ($\sigma = 1{,}15$).
+Contra o aleatório global, o grafo pareceria fortemente \textit{small-world} ($\sigma = \sigmaGlobal$), e o mesmo ocorre com os valores teóricos de um grafo aleatório, $L_{rand} \approx \ln n / \ln \langle k \rangle$ e $C_{rand} \approx \langle k \rangle / n$ (coluna ``Teórico). Essa conclusão, porém, é um artefato: o aleatório global ignora que as interações só podem ocorrer dentro de uma partida. Quando essa restrição é respeitada, $L$ coincide com o aleatório ($1{,}34$ contra \LBlocos) e a clusterização é apenas \excessoC\% maior ($\sigma = \sigmaBlocos$).
 
-\textbf{Faz sentido para este grafo?} Só parcialmente. Dentro de cada partida, todos estão a no máximo 3 passos, mas isso decorre do tamanho minúsculo dos grupos ($\leq 8$ pessoas), não de atalhos de longo alcance. Entre partidas a distância é infinita, então a rede como um todo não é \textit{small-world}. O pequeno excesso de clusterização ($\sigma = 1{,}15$) indica que o fechamento triádico é um pouco maior do que o acaso explicaria.
+\textbf{Faz sentido para este grafo?} Só parcialmente. Dentro de cada partida, todos estão a no máximo 3 passos, mas isso decorre do tamanho minúsculo dos grupos ($\leq 8$ pessoas), não de atalhos de longo alcance. Entre partidas a distância é infinita, então a rede como um todo não é \textit{small-world}. O pequeno excesso de clusterização ($\sigma = \sigmaBlocos$) indica que o fechamento triádico é um pouco maior do que o acaso explicaria.
 
 \textbf{Implicação prática.} Em uma rede \textit{small-world}, informação e influência se propagam em poucos passos. Aqui, dentro de uma mesa de jogo, qualquer olhar ou sinal pode alcançar todos em um ou dois intermediários, o que favorece a coordenação rápida (e a detecção de comportamentos suspeitos). Por outro lado, nada se propaga entre partidas.
 
@@ -340,6 +309,22 @@ Investigamos se $P(k) \sim k^{-\gamma}$. A Figura~\ref{fig:lp} mostra a distribu
 
 \textbf{A distribuição não sugere lei de potência.} A regressão em log-log tem inclinação \emph{positiva} ($P(k) \propto k^{+1{,}26}$) e $R^2 = 0{,}46$: os pontos não formam uma reta decrescente, e sim uma curva com máximo em $k = 3$. A CCDF cai abruptamente após $k = 4$, em vez de decair lentamente. Além disso, a razão $k_{max}/\langle k \rangle = 1{,}66$ indica ausência de hubs, e a variância dos graus ($2{,}00$) é menor que a média ($4{,}22$). A distribuição é \emph{subdispersa} e se aproxima mais de uma Poisson (curva verde) do que de uma lei de potência. Faz sentido: o grau é limitado pelo tamanho da partida ($k \leq 7$), o que impede qualquer cauda pesada.
 
+Para não depender apenas da regressão, que é sabidamente enviesada~\cite{clauset2009}, aplicamos também o estimador de máxima verossimilhança (MV) discreto aproximado,
+\[
+  \hat\gamma = 1 + n_c \Big/ \sum_{i=1}^{n_c} \ln\frac{k_i}{k_{min} - 1/2},
+\]
+onde $n_c$ é o número de vértices na cauda ($k_i \geq k_{min}$), escolhendo $k_{min}$ pela menor distância de Kolmogorov--Smirnov (KS) entre a CCDF empírica e a do modelo, entre os valores que deixam ao menos 50 vértices e 3 graus distintos na cauda (Tabela~\ref{tab:pl}).
+
+\begin{table}[h]
+  \caption{Ajuste de lei de potência: regressão log-log e máxima verossimilhança.}
+  \label{tab:pl}
+  \begin{adjustbox}{max width=\columnwidth}
+  \input{../results/tab_potencia.tex}
+  \end{adjustbox}
+\end{table}
+
+O MV confirma a conclusão. O melhor ajuste usa apenas a ``cauda'' $k \geq 5$, com três valores de grau, e produz $\hat\gamma \approx 5{,}4$: um decaimento muito mais abrupto que o intervalo $2 < \gamma < 3$ típico de redes livres de escala. Além disso, a distância KS de 0,10 é alta, ou seja, nem nessa cauda curta a lei de potência descreve bem os dados.
+
 \subsubsection{Robustez}
 Como o grafo é desconexo, a política adotada foi analisar o grafo completo (todas as 62 componentes), já que a LCC tem apenas 8 vértices. Removemos $r = \lfloor 0{,}05 \times 451 \rfloor = 22$ vértices em três cenários: remoção aleatória (30 repetições), ataque por grau e ataque por \textit{betweenness}. Nos ataques, a centralidade foi calculada uma vez (ranking fixo) com implementação própria do algoritmo de Brandes. Medimos: (A) tamanho da LCC e fração de vértices no maior pedaço conexo da própria partida; (B) número de componentes; (C) comprimento médio e eficiência global $E = \frac{1}{n(n-1)}\sum_{u\neq v} 1/d(u,v)$; e (D) fração de vértices isolados.
 
@@ -347,18 +332,7 @@ Como o grafo é desconexo, a política adotada foi analisar o grafo completo (to
   \caption{Métricas de robustez após a remoção de 5\% dos vértices (aleatória: média $\pm$ desvio de 30 repetições).}
   \label{tab:rob}
   \begin{adjustbox}{max width=\columnwidth}
-  \begin{tabular}{lrrrr}
-    \toprule
-    Métrica & Original & Aleatória & Grau & Betw. \\
-    \midrule
-    A: LCC & 8 & 8 $\pm$ 0 & 8 & 8 \\
-    A: fração no núcleo & 1,000 & 0,951 $\pm$ 0,001 & 0,945 & 0,933 \\
-    B: componentes & 62 & 62,1 $\pm$ 0,3 & 65 & 68 \\
-    C: comprimento médio & 1,340 & 1,342 $\pm$ 0,006 & 1,395 & 1,394 \\
-    C: eficiência ($\times 10^{-2}$) & 1,175 & 1,177 $\pm$ 0,01 & 1,126 & 1,118 \\
-    D: isolados (\%) & 0,00 & 0,03 $\pm$ 0,08 & 0,70 & 1,17 \\
-    \bottomrule
-  \end{tabular}
+  \input{../results/tab_robustez.tex}
   \end{adjustbox}
 \end{table}
 
@@ -374,7 +348,7 @@ Como o grafo é desconexo, a política adotada foi analisar o grafo completo (to
 \textbf{Ataque direcionado: também robusta.} O ataque degrada a rede mais que o acaso (até 68 componentes e 1,2\% de isolados com \textit{betweenness}), mas a diferença é pequena: a fração no núcleo cai apenas de 0,951 para 0,933. Não há um colapso como o observado em redes livres de escala. Como $k_{max} = 7$ e a clusterização é alta, não existem hubs cuja remoção fragmente a rede, e cada partida tem caminhos redundantes. Além disso, os 22 vértices mais centrais estão espalhados por 17 (grau) e 20 (\textit{betweenness}) partidas distintas, de modo que o ataque é diluído entre componentes independentes. A \textit{betweenness} foi ligeiramente mais eficaz que o grau por mirar justamente os poucos vértices-ponte dentro das partidas.
 
 \subsubsection{Descoberta mais interessante}
-A descoberta mais interessante foi que \textbf{toda a estrutura global do grafo é explicada pela partição em partidas}. Um modelo nulo que conhece apenas quantas arestas há em cada partida reproduz quase exatamente o comprimento médio ($L$: 1,34 contra 1,35), o número de componentes e 88\% da clusterização. O valor $\sigma = 309$, que sugeriria uma rede \textit{small-world} exemplar, é um artefato da escolha do modelo nulo. Isso ilustra um cuidado metodológico importante: o grafo aleatório de referência precisa respeitar as restrições físicas do sistema (aqui, quem pode olhar para quem).
+A descoberta mais interessante foi que \textbf{toda a estrutura global do grafo é explicada pela partição em partidas}. Um modelo nulo que conhece apenas quantas arestas há em cada partida reproduz quase exatamente o comprimento médio ($L$: 1,34 contra 1,35), o número de componentes e \fracaoCBlocos\% da clusterização. O valor $\sigma = \sigmaGlobal$, que sugeriria uma rede \textit{small-world} exemplar, é um artefato da escolha do modelo nulo. Isso ilustra um cuidado metodológico importante: o grafo aleatório de referência precisa respeitar as restrições físicas do sistema (aqui, quem pode olhar para quem).
 
 A estrutura \emph{fina} está na direção das arestas: apenas 46,7\% dos arcos são recíprocos, 62 participantes (13,7\%) não recebem atenção acima do uniforme de ninguém, e o participante mais olhado de cada partida recebe em média 30\% dos arcos. Ou seja, a atenção em um jogo de dedução social é assimétrica e concentrada, justamente o tipo de padrão que os autores do dataset exploram para detectar enganadores~\cite{kumar2021}.
 
@@ -385,20 +359,11 @@ Geramos, com implementações próprias, grafos Erdős–Rényi ($G(n,m)$), Bara
   \caption{Comparação com modelos clássicos (média de 10 amostras).}
   \label{tab:modelos}
   \begin{adjustbox}{max width=\columnwidth}
-  \begin{tabular}{lrrrrr}
-    \toprule
-    Modelo & $k_{max}$ & Var($k$) & $C$ & $L$ & Comp. \\
-    \midrule
-    Observado & 7 & 2,00 & 0,754 & 1,34 & 62 \\
-    Erdős–Rényi & 11,7 & 4,01 & 0,009 & 4,40 & 4,0 \\
-    Barabási–Albert & 62,0 & 25,42 & 0,065 & 3,69 & 1 \\
-    Watts–Strogatz & 6,0 & 0,40 & 0,373 & 7,36 & 1 \\
-    \bottomrule
-  \end{tabular}
+  \input{../results/tab_modelos.tex}
   \end{adjustbox}
 \end{table}
 
-Globalmente, \textbf{nenhum dos três modelos descreve o grafo}. Barabási–Albert gera hubs ($k_{max} = 62$) inexistentes aqui. Erdős–Rényi e Watts–Strogatz produzem redes conexas com caminhos longos e clusterização baixa ou moderada. Localmente, contudo, cada partida se aproxima de um \textbf{Erdős–Rényi denso} $G(n, p)$ com $p \approx 0{,}67$: o modelo por blocos reproduz $L$ e quase toda a clusterização (Tabela~\ref{tab:sw}). O modelo que melhor descreve a rede inteira é, portanto, a união disjunta de grafos aleatórios densos, um caso extremo de modelo de blocos estocástico sem arestas entre blocos.
+Globalmente, \textbf{nenhum dos três modelos descreve o grafo}. Barabási–Albert gera hubs ($k_{max} \approx \kmaxBA$) inexistentes aqui. Erdős–Rényi e Watts–Strogatz produzem redes conexas com caminhos longos e clusterização baixa ou moderada. Localmente, contudo, cada partida se aproxima de um \textbf{Erdős–Rényi denso} $G(n, p)$ com $p \approx 0{,}67$: o modelo por blocos reproduz $L$ e quase toda a clusterização (Tabela~\ref{tab:sw}). O modelo que melhor descreve a rede inteira é, portanto, a união disjunta de grafos aleatórios densos, um caso extremo de modelo de blocos estocástico sem arestas entre blocos.
 
 \section{Discussão Crítica}
 A análise revelou uma rede muito diferente das redes de grande escala tipicamente estudadas, e a comparação ajuda a entender o alcance de cada conceito.
@@ -411,14 +376,14 @@ A análise revelou uma rede muito diferente das redes de grande escala tipicamen
 
 \textbf{Conceitos dependentes do modelo nulo.} O caso do \textit{small-world} mostra que métricas comparativas só são informativas quando o modelo nulo é adequado. O mesmo vale para a robustez: a métrica clássica ``tamanho da LCC'' é inútil aqui (vale 8 em todos os cenários), o que motivou a métrica complementar de fração no núcleo da partida.
 
-\textbf{Desempenho dos algoritmos.} Os algoritmos $O(V+E)$ (BFS, DFS, Eulerianidade e Tarjan) foram os mais rápidos, como esperado. Kruskal foi mais lento que Prim pelo custo da ordenação global das arestas. A observação mais didática é que a estrutura do grafo altera a ordem prática dos algoritmos: Floyd-Warshall, de pior complexidade assintótica, superou Bellman-Ford a partir de todas as fontes, porque a poda de intermediários inalcançáveis explora a partição em blocos.
+\textbf{Desempenho dos algoritmos.} Os algoritmos $O(V+E)$ (BFS, DFS, Eulerianidade e Tarjan) foram os mais rápidos, como esperado. Kruskal foi mais lento que Prim pelo custo da ordenação global das arestas. Os expoentes ajustados ficaram próximos de 1 para os algoritmos lineares e de $O(E \log V)$, confirmando a complexidade teórica. A observação mais didática é que a estrutura do grafo altera a ordem prática dos algoritmos: Floyd-Warshall, de pior complexidade assintótica, superou Bellman-Ford a partir de todas as fontes, porque a poda de intermediários inalcançáveis explora a partição em blocos. O experimento de escala confirma esse efeito: o crescimento efetivo foi um grau de $V$ abaixo do pior caso nos algoritmos de todas as fontes e no Floyd-Warshall.
 
 \section{Conclusão}
 Este trabalho analisou o grafo G16 (\textit{comm-f2f-Resistance}) do SNAP, determinado pela matrícula 224215945. A partir de 3,1 milhões de arestas temporais, um pipeline de tratamento (agregação temporal, remoção do laptop, limiar de atenção, simetrização e união das partidas) produziu um grafo de 451 vértices, 951 arestas e 62 componentes. As principais conclusões são:
 
 \begin{itemize}
   \item A rede é a união de 62 grupos densos (densidade intra-partida de 0,67), com clusterização alta ($0{,}75$), diâmetro máximo 3 e grau limitado a 7;
-  \item Há indícios aparentes de \textit{small-world} contra um aleatório global ($\sigma = 309$), mas eles desaparecem com um modelo nulo que respeita as partidas ($\sigma = 1{,}15$); os caminhos curtos resultam do tamanho dos grupos;
+  \item Há indícios aparentes de \textit{small-world} contra um aleatório global ($\sigma = \sigmaGlobal$), mas eles desaparecem com um modelo nulo que respeita as partidas ($\sigma = \sigmaBlocos$); os caminhos curtos resultam do tamanho dos grupos;
   \item A distribuição de graus \textbf{não} segue lei de potência: é subdispersa, sem hubs e próxima de uma Poisson;
   \item A rede é robusta tanto a falhas aleatórias quanto a ataques direcionados, por não possuir hubs e por ter alta redundância local;
   \item Todos os algoritmos da disciplina foram aplicados ao grafo completo, com resultados validados entre si e contra uma biblioteca de referência;
@@ -431,6 +396,7 @@ Este trabalho analisou o grafo G16 (\textit{comm-f2f-Resistance}) do SNAP, deter
 \bibitem{snap} LESKOVEC, Jure; KREVL, Andrej. \textit{SNAP Datasets: Stanford Large Network Dataset Collection}, 2014. Disponível em: \url{https://snap.stanford.edu/data}.
 \bibitem{cormen} CORMEN, Thomas H. et al. \textit{Introduction to Algorithms}. 4. ed. Cambridge: MIT Press, 2022.
 \bibitem{barabasi} BARABÁSI, Albert-László. \textit{Network Science}. Cambridge: Cambridge University Press, 2016. Disponível em: \url{http://networksciencebook.com}.
+\bibitem{clauset2009} CLAUSET, Aaron; SHALIZI, Cosma R.; NEWMAN, Mark E. J. Power-law distributions in empirical data. \textit{SIAM Review}, v. 51, n. 4, p. 661--703, 2009.
 \bibitem{watts} WATTS, Duncan J.; STROGATZ, Steven H. Collective dynamics of `small-world' networks. \textit{Nature}, v. 393, p. 440--442, 1998.
 \end{thebibliography}
 
