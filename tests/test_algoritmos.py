@@ -149,6 +149,25 @@ def test_betweenness(grafo):
         assert obtido[v] == pytest.approx(esperado[v])
 
 
+def test_pontes_articulacoes():
+    for semente in range(5):
+        g = grafo_aleatorio(60, 0.06, semente)
+        h = para_nx(g)
+        pontes, art = alg.pontes_articulacoes(g)
+        assert {frozenset(p) for p in pontes} == {frozenset(p) for p in nx.bridges(h)}
+        assert set(art) == set(nx.articulation_points(h))
+
+
+def test_pagerank():
+    for dirigido in (False, True):
+        g = grafo_aleatorio(40, 0.1, 7, dirigido=dirigido)
+        h = para_nx(g)
+        esperado = nx.pagerank(h, weight=None, tol=1e-10, max_iter=1000)
+        obtido = prop.pagerank(g)
+        for v in esperado:
+            assert obtido[v] == pytest.approx(esperado[v], abs=1e-6)
+
+
 def test_eficiencia(grafo):
     assert prop.eficiencia_global(grafo) == pytest.approx(nx.global_efficiency(para_nx(grafo)))
 

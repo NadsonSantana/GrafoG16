@@ -193,6 +193,27 @@ def betweenness(g):
     return {v: c / 2 for v, c in cb.items()}  # cada par contado duas vezes
 
 
+def pagerank(g, amortecimento=0.85, tolerancia=1e-10, max_iter=1000):
+    """PageRank por iteração de potência (arestas sem peso). Vértices sem arestas de
+    saída distribuem seu valor uniformemente entre todos os vértices."""
+    vs = list(g.adj)
+    n = len(vs)
+    pr = dict.fromkeys(vs, 1 / n)
+    for _ in range(max_iter):
+        sem_saida = sum(pr[v] for v in vs if not g.adj[v])
+        novo = dict.fromkeys(vs, (1 - amortecimento) / n + amortecimento * sem_saida / n)
+        for u in vs:
+            if g.adj[u]:
+                parcela = amortecimento * pr[u] / len(g.adj[u])
+                for v in g.adj[u]:
+                    novo[v] += parcela
+        erro = sum(abs(novo[v] - pr[v]) for v in vs)
+        pr = novo
+        if erro < tolerancia:
+            break
+    return pr
+
+
 # ---------------------------------------------------------------- robustez
 
 def eficiencia_global(g):
@@ -228,9 +249,10 @@ def metricas_robustez(g, n_original=None):
     }
 
 
-def robustez(g, fracao=0.05, repeticoes=30, semente=42):
-    """Compara remoção aleatória (várias repetições) com ataques direcionados
-    por grau e por betweenness (ranking fixo, calculado no grafo original)."""
+def robustez(g, fracao=0.05, repeticoes=30, semente=42, dirigido=None):
+    """Compara remoção aleatória (várias repetições) com ataques direcionados por grau,
+    betweenness e PageRank (ranking fixo, calculado no grafo original). O PageRank é
+    calculado na versão dirigida, quando fornecida (quem recebe atenção)."""
     rng = random.Random(semente)
     r = int(math.floor(fracao * g.num_vertices()))
     vs = g.vertices()
@@ -244,12 +266,17 @@ def robustez(g, fracao=0.05, repeticoes=30, semente=42):
     top_grau = sorted(vs, key=lambda v: (-gr[v], v))[:r]
     bc = betweenness(g)
     top_bc = sorted(vs, key=lambda v: (-bc[v], v))[:r]
+    pr = pagerank(dirigido if dirigido is not None else g)
+    top_pr = sorted(vs, key=lambda v: (-pr[v], v))[:r]
     return {
         "r": r,
         "original": base,
         "aleatoria": aleatorias,
         "grau": metricas_robustez(g.remover_vertices(top_grau), n),
         "betweenness": metricas_robustez(g.remover_vertices(top_bc), n),
+        "pagerank": metricas_robustez(g.remover_vertices(top_pr), n),
+        "partidas_afetadas_pr": len({v.split("_")[0] for v in top_pr}),
+        "sobreposicao_grau_pr": len(set(top_grau) & set(top_pr)),
         "partidas_afetadas_grau": len({v.split("_")[0] for v in top_grau}),
         "partidas_afetadas_bc": len({v.split("_")[0] for v in top_bc}),
     }

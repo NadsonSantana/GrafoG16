@@ -271,3 +271,50 @@ def dijkstra_todos(g):
 def bellman_ford_todos(g):
     """Bellman-Ford a partir de cada vértice."""
     return {s: bellman_ford(g, s)[0] for s in g.adj}
+
+
+def pontes_articulacoes(g):
+    """Pontes e pontos de articulação de um grafo não-direcionado (low-link de Tarjan),
+    versão iterativa. Retorna (pontes, articulações). O(V + E)."""
+    descoberta = {}
+    baixo = {}
+    pai = {}
+    pontes = []
+    articulacoes = set()
+    tempo = 0
+    for raiz in g.adj:
+        if raiz in descoberta:
+            continue
+        descoberta[raiz] = baixo[raiz] = tempo
+        tempo += 1
+        pai[raiz] = None
+        filhos_raiz = 0
+        pilha = [(raiz, iter(g.adj[raiz]))]
+        while pilha:
+            u, it = pilha[-1]
+            avancou = False
+            for v in it:
+                if v not in descoberta:
+                    pai[v] = u
+                    descoberta[v] = baixo[v] = tempo
+                    tempo += 1
+                    if u == raiz:
+                        filhos_raiz += 1
+                    pilha.append((v, iter(g.adj[v])))
+                    avancou = True
+                    break
+                if v != pai[u]:
+                    baixo[u] = min(baixo[u], descoberta[v])
+            if avancou:
+                continue
+            pilha.pop()
+            p = pai[u]
+            if p is not None:
+                baixo[p] = min(baixo[p], baixo[u])
+                if baixo[u] > descoberta[p]:
+                    pontes.append((p, u))
+                if p != raiz and baixo[u] >= descoberta[p]:
+                    articulacoes.add(p)
+        if filhos_raiz > 1:
+            articulacoes.add(raiz)
+    return pontes, sorted(articulacoes)
