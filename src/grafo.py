@@ -35,7 +35,8 @@ class Grafo:
         return h
 
     def subgrafo(self, vertices):
-        manter = set(vertices)
+        """Subgrafo induzido; preserva a ordem de entrada (resultado determinístico)."""
+        manter = dict.fromkeys(vertices)
         h = Grafo(self.dirigido)
         for u in manter:
             h.adj[u] = {v: p for v, p in self.adj[u].items() if v in manter}

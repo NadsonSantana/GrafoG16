@@ -2,7 +2,7 @@
 experimento de escala da complexidade observada (ajuste log-log sobre a mediana
 de cada ponto, robusta a execuções atípicas; média, desvio e IC 95% também são salvos).
 
-Uso: python -m src.parte2 [--rapido]"""
+Uso: python -m src.parte2 [--rapido | --so-figuras]"""
 
 import math
 
@@ -11,7 +11,7 @@ import numpy as np
 from . import algoritmos as alg
 from .benchmark import medir
 from .comum import (AQUA, AZUL, LARANJA, TINTA, TINTA_2, VERMELHO, carregar, matplotlib,
-                    plt, preparar, salvar_figura, salvar_json)
+                    ler_json, plt, preparar, salvar_figura, salvar_json, so_figuras)
 
 
 def parte2(g, d, rapido=False):
@@ -25,6 +25,7 @@ def parte2(g, d, rapido=False):
         ("Dijkstra (todas as fontes)", "O(V(V+E)\\log V)", lambda: alg.dijkstra_todos(g), n_rapido),
         ("Bellman-Ford (todas as fontes)", "O(V^2 E)", lambda: alg.bellman_ford_todos(g), n_bf),
         ("Floyd-Warshall", "O(V^3)", lambda: alg.floyd_warshall(g), n_fw),
+        ("Floyd-Warshall (numpy)", "O(V^3)", lambda: alg.floyd_warshall_numpy(g), n_fw),
         ("Tarjan", "O(V+E)", lambda: alg.tarjan(d), n_rapido),
         ("Tarjan (pontes e articulações)", "O(V+E)", lambda: alg.pontes_articulacoes(g), n_rapido),
         ("Prim", "O(E\\log V)", lambda: alg.prim(g), n_rapido),
@@ -43,6 +44,8 @@ def parte2(g, d, rapido=False):
     euler_por_partida = [alg.verificar_euleriano(g.subgrafo(c))["tipo"]
                          for c in alg.componentes_conexas(g)]
     vs, fw = saidas["Floyd-Warshall"]
+    vs_np, fw_np = saidas["Floyd-Warshall (numpy)"]
+    fw_numpy_concorda = vs_np == vs and bool(np.allclose(np.array(fw), fw_np))
     idx = {v: i for i, v in enumerate(vs)}
     dj = saidas["Dijkstra (todas as fontes)"]
     bf = saidas["Bellman-Ford (todas as fontes)"]
@@ -67,6 +70,7 @@ def parte2(g, d, rapido=False):
         "distancia_max": float(max(finitos)),
         "par_distancia_max": [vs[i_max], vs[j_max]],
         "dijkstra_bf_fw_concordam": concordam,
+        "fw_numpy_concorda": fw_numpy_concorda,
         "bellman_ford_ciclo_negativo": False,
         "num_scc": len(sccs),
         "scc_tamanhos": {t: [len(c) for c in sccs].count(t)
@@ -114,6 +118,7 @@ TEORICA = {  # nome -> (rótulo LaTeX, f(V, E), usa versão dirigida)
     "Dijkstra*": ("O(V(V+E)\\log V)", lambda v, e: v * (v + e) * math.log2(v), False),
     "Bellman-Ford*": ("O(V^2E)", lambda v, e: v * v * e, False),
     "Floyd-Warshall": ("O(V^3)", lambda v, e: v ** 3, False),
+    "Floyd-Warshall (numpy)": ("O(V^3)", lambda v, e: v ** 3, False),
     "Tarjan": ("O(V+E)", lambda v, e: v + e, True),
     "Pontes/articulações": ("O(V+E)", lambda v, e: v + e, False),
     "Prim": ("O(E\\log V)", lambda v, e: e * math.log2(v), False),
@@ -122,7 +127,8 @@ TEORICA = {  # nome -> (rótulo LaTeX, f(V, E), usa versão dirigida)
 FUNCOES = {
     "BFS": alg.bfs_completa, "DFS": alg.dfs_completa, "Eulerianidade": alg.verificar_euleriano,
     "Dijkstra*": alg.dijkstra_todos, "Bellman-Ford*": alg.bellman_ford_todos,
-    "Floyd-Warshall": alg.floyd_warshall, "Tarjan": alg.tarjan,
+    "Floyd-Warshall": alg.floyd_warshall, "Floyd-Warshall (numpy)": alg.floyd_warshall_numpy,
+    "Tarjan": alg.tarjan,
     "Pontes/articulações": alg.pontes_articulacoes,
     "Prim": alg.prim, "Kruskal": alg.kruskal,
 }
@@ -140,7 +146,8 @@ def parte2_escala(g, d, rapido=False):
         sub_g, sub_d = g.subgrafo(vs), d.subgrafo(vs)
         for nome, (_, f, dirigido) in TEORICA.items():
             h = sub_d if dirigido else sub_g
-            n = 3 if rapido else (10 if nome in ("Bellman-Ford*", "Floyd-Warshall") else 30)
+            n = 3 if rapido else (10 if nome in ("Bellman-Ford*", "Floyd-Warshall",
+                                                  "Floyd-Warshall (numpy)") else 30)
             _, est = medir(lambda: FUNCOES[nome](h), n)
             v_, e_ = h.num_vertices(), h.num_arestas()
             linhas.append({"algoritmo": nome, "partidas": k, "V": v_, "E": e_,
@@ -163,9 +170,9 @@ def parte2_escala(g, d, rapido=False):
 
 
 def figura_escala(linhas):
-    cores = [AZUL, LARANJA, AQUA, "#eda100", "#e87ba4", "#008300", "#4a3aa7", "#4a3aa7",
-             VERMELHO, TINTA_2]
-    marcadores = ["o", "s", "^", "D", "v", "P", "X", "x", "<", ">"]
+    cores = [AZUL, LARANJA, AQUA, "#eda100", "#e87ba4", "#008300", "#008300", "#4a3aa7",
+             "#4a3aa7", VERMELHO, TINTA_2]
+    marcadores = ["o", "s", "^", "D", "v", "P", "+", "X", "x", "<", ">"]
     fig, ax = plt.subplots(figsize=(3.3, 3.4))
     for (nome, cor, mk) in zip(TEORICA, cores, marcadores):
         pts = [x for x in linhas if x["algoritmo"] == nome]
@@ -189,8 +196,18 @@ def figura_escala(linhas):
     salvar_figura(fig, "escala")
 
 
+def figuras():
+    """Redesenha as figuras da Parte II a partir dos JSONs de results/."""
+    figura_tempos(ler_json("parte2_tempos.json"))
+    figura_escala(ler_json("parte2_escala.json")["linhas"])
+
+
 def main():
     rapido = preparar()
+    if so_figuras():
+        print("Parte II - redesenhando figuras")
+        figuras()
+        return
     g, d = carregar()
     print("Parte II - algoritmos")
     parte2(g, d, rapido)

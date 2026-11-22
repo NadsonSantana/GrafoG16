@@ -1,16 +1,22 @@
 """Executa todas as análises (Partes I, II e III) e gera as tabelas do relatório.
 
-Uso: python -m src.executar [--rapido]
+Uso: python -m src.executar [--rapido | --so-figuras]
 Cada parte também pode ser executada isoladamente: python -m src.parte1 | parte2 | parte3
 """
 
 from . import parte1, parte2, parte3, tabelas
-from .comum import RESULTADOS, FIGURAS, carregar, preparar
+from .comum import RESULTADOS, FIGURAS, carregar, preparar, so_figuras
 
 
 def main():
     rapido = preparar()
     g, d = carregar()
+    if so_figuras():
+        print("Redesenhando as figuras a partir de results/")
+        parte1.figuras(g)
+        parte2.figuras()
+        parte3.figuras()
+        return
     print("Parte I - métricas estruturais")
     parte1.parte1(g)
     print("Parte II - algoritmos")

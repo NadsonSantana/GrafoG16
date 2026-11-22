@@ -89,6 +89,7 @@ def tab_metricas():
          "BFS de todos os vértices"),
         ("Clusterização média", num(m["clusterizacao_media"]), "exato (vizinhanças)"),
         ("Número de triângulos", num(m["triangulos"]), "exato (vizinhanças)"),
+        ("Transitividade global", num(m["transitividade"]), "$3T$ / triplas conexas"),
         ("Visualização", "Fig.~\\ref{fig:teaser}, \\ref{fig:partida0}", "grafo completo"),
     ]
     salvar("tab_metricas.tex", tabular("llp{0.30\\columnwidth}",
@@ -146,7 +147,8 @@ def tab_potencia():
         ("Regressão log-log de $P(k)$: inclinação", num(-lp["gamma_mq"], 2)),
         ("Regressão log-log: $R^2$", num(lp["r2"], 2)),
         ("MV: $k_{min}$ (mínima distância KS)", mv["kmin"]),
-        ("MV: $\\gamma \\pm$ erro padrão", f"{num(mv['gamma'], 2)} $\\pm$ {num(mv['erro_padrao'], 2)}"),
+        ("MV exato: $\\gamma \\pm$ erro padrão", f"{num(mv['gamma'], 2)} $\\pm$ {num(mv['erro_padrao'], 2)}"),
+        ("MV aproximação contínua: $\\gamma$", num(mv["gamma_aprox"], 2)),
         ("MV: vértices na cauda",
          f"{mv['n_cauda']} ({sum(1 for k in lp['ks'] if k >= mv['kmin'])} valores de $k$)"),
         ("MV: distância KS", num(mv["ks"], 3)),
@@ -215,6 +217,9 @@ def valores():
         "expFW": num(a["Floyd-Warshall"]["expoente"], 2),
         "expPrim": num(a["Prim"]["expoente"], 2),
         "expKruskal": num(a["Kruskal"]["expoente"], 2),
+        "tempoFWnumpy": num(ms["Floyd-Warshall (numpy)"], 1),
+        "razaoFWnumpy": num(ms["Floyd-Warshall (numpy)"] / ms["Floyd-Warshall"], 1),
+        "expVFWnumpy": num(a["Floyd-Warshall (numpy)"]["expoente_v"], 2),
         "expEuler": num(a["Eulerianidade"]["expoente"], 2),
     }
     sw = ler("parte3_small_world.json")["global"]

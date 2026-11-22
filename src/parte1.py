@@ -1,14 +1,14 @@
 """Parte I: métricas estruturais, distribuição de graus e visualização do grafo.
 
-Uso: python -m src.parte1"""
+Uso: python -m src.parte1 [--so-figuras]"""
 
 import os
 
 import networkx as nx  # usado apenas para o layout da visualização
 
 from . import algoritmos as alg
-from .comum import (AZUL, DADOS, TINTA_2, carregar, eixo_graus_log, plt, preparar, salvar_figura,
-                    salvar_json)
+from .comum import (AZUL, DADOS, TINTA_2, carregar, eixo_graus_log, ler_json, plt, preparar,
+                    salvar_figura, salvar_json, so_figuras)
 from .grafo import Grafo
 from .metricas import metricas_estruturais
 
@@ -52,7 +52,10 @@ def figura_visualizacao(g):
     pos = {}
     colunas = 16
     for i, comp in enumerate(comps):
-        sub = nx.spring_layout(h.subgraph(comp), seed=1)
+        bloco = nx.Graph()
+        bloco.add_nodes_from(sorted(comp))  # ordem fixa: o layout não depende de hash
+        bloco.add_edges_from(h.subgraph(comp).edges)
+        sub = nx.spring_layout(bloco, seed=1)
         cx, cy = (i % colunas) * 3.0, -(i // colunas) * 3.0
         for v, (x, y) in sub.items():
             pos[v] = (cx + x, cy + y)
@@ -80,9 +83,20 @@ def figura_visualizacao(g):
     salvar_figura(fig, "partida0")
 
 
+def figuras(g):
+    """Redesenha as figuras da Parte I a partir de results/parte1_metricas.json."""
+    m = ler_json("parte1_metricas.json")
+    figura_graus({int(k): v for k, v in m["distribuicao_graus"].items()}, m["vertices"])
+    figura_visualizacao(g)
+
+
 def main():
     preparar()
     g, _ = carregar()
+    if so_figuras():
+        print("Parte I - redesenhando figuras")
+        figuras(g)
+        return
     print("Parte I - métricas estruturais")
     parte1(g)
 

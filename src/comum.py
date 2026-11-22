@@ -43,6 +43,16 @@ def carregar():
     return g, d
 
 
+def ler_json(nome):
+    with open(os.path.join(RESULTADOS, nome)) as f:
+        return json.load(f)
+
+
+def so_figuras():
+    """--so-figuras: redesenha as figuras a partir dos JSONs de results/, sem recalcular."""
+    return "--so-figuras" in sys.argv
+
+
 def salvar_json(nome, dados):
     with open(os.path.join(RESULTADOS, nome), "w") as f:
         json.dump(dados, f, indent=2, ensure_ascii=False, default=str)
@@ -50,8 +60,9 @@ def salvar_json(nome, dados):
 
 def salvar_figura(fig, nome):
     """Salva a figura em PDF vetorial (relatório) e em PNG (README e notebook)."""
-    fig.savefig(os.path.join(FIGURAS, f"{nome}.pdf"))
-    fig.savefig(os.path.join(FIGURAS, f"{nome}.png"))
+    # sem data de criação/software nos metadados: redesenhar não altera os arquivos
+    fig.savefig(os.path.join(FIGURAS, f"{nome}.pdf"), metadata={"CreationDate": None})
+    fig.savefig(os.path.join(FIGURAS, f"{nome}.png"), metadata={"Software": None})
     plt.close(fig)
 
 

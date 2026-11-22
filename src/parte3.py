@@ -1,14 +1,14 @@
 """Parte III: small-world, lei de potência, robustez e comparação com modelos clássicos.
 
-Uso: python -m src.parte3 [--rapido]"""
+Uso: python -m src.parte3 [--rapido | --so-figuras]"""
 
 
 import numpy as np
 
 from . import algoritmos as alg
 from . import propriedades as prop
-from .comum import (AQUA, AZUL, LARANJA, TINTA, TINTA_2, VERMELHO, carregar,
-                    eixo_graus_log, plt, preparar, salvar_figura, salvar_json)
+from .comum import (AQUA, AZUL, LARANJA, TINTA, TINTA_2, VERMELHO, carregar, eixo_graus_log,
+                    ler_json, plt, preparar, salvar_figura, salvar_json, so_figuras)
 
 
 def parte3(g, d, rapido=False):
@@ -106,8 +106,18 @@ def figura_robustez(rob):
     salvar_figura(fig, "robustez")
 
 
+def figuras():
+    """Redesenha as figuras da Parte III a partir dos JSONs de results/."""
+    figura_lei_potencia(ler_json("parte3_lei_potencia.json"))
+    figura_robustez(ler_json("parte3_robustez.json"))
+
+
 def main():
     rapido = preparar()
+    if so_figuras():
+        print("Parte III - redesenhando figuras")
+        figuras()
+        return
     g, d = carregar()
     print("Parte III - propriedades da rede")
     parte3(g, d, rapido)

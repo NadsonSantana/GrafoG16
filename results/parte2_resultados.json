@@ -19,6 +19,7 @@
     "g05_p4"
   ],
   "dijkstra_bf_fw_concordam": true,
+  "fw_numpy_concorda": true,
   "bellman_ford_ciclo_negativo": false,
   "num_scc": 131,
   "scc_tamanhos": {
