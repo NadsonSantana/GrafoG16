@@ -123,7 +123,7 @@ determinísticos (sementes fixas).
 
 ## Como executar
 
-Requisitos: Python 3.10+.
+Requisitos: Python 3.10+ (testado com Python 3.11.2 e as versões fixadas em `requirements.txt`).
 
 ```bash
 python3 -m venv .venv
