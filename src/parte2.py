@@ -1,17 +1,17 @@
 """Parte II: algoritmos da disciplina no grafo completo (tempo real com IC 95%) e
-experimento de escala da complexidade observada.
+experimento de escala da complexidade observada (ajuste log-log sobre a mediana
+de cada ponto, robusta a execuções atípicas; média, desvio e IC 95% também são salvos).
 
 Uso: python -m src.parte2 [--rapido]"""
 
 import math
-import os
 
 import numpy as np
 
 from . import algoritmos as alg
 from .benchmark import medir
-from .comum import (AQUA, AZUL, FIGURAS, LARANJA, TINTA, TINTA_2, VERMELHO, carregar, matplotlib,
-                    plt, preparar, salvar_json)
+from .comum import (AQUA, AZUL, LARANJA, TINTA, TINTA_2, VERMELHO, carregar, matplotlib,
+                    plt, preparar, salvar_figura, salvar_json)
 
 
 def parte2(g, d, rapido=False):
@@ -104,8 +104,7 @@ def figura_tempos(tempos):
     for yi, m, e in zip(y, medias, erros):
         ax.text((m + e) * 1.2, yi, f"{m:.3g} ms", va="center", fontsize=7, color=TINTA_2)
     ax.set_xlim(right=max(medias) * 12)
-    fig.savefig(os.path.join(FIGURAS, "tempos.pdf"))
-    plt.close(fig)
+    salvar_figura(fig, "tempos")
 
 
 TEORICA = {  # nome -> (rótulo LaTeX, f(V, E), usa versão dirigida)
@@ -151,7 +150,7 @@ def parte2_escala(g, d, rapido=False):
     for nome, (rotulo, _, _) in TEORICA.items():
         pts = [x for x in linhas if x["algoritmo"] == nome]
         x = np.log([p["f_teorica"] for p in pts])
-        y = np.log([p["media"] for p in pts])
+        y = np.log([p["mediana"] for p in pts])  # mediana: robusta a execuções atípicas
         b, _ = np.polyfit(x, y, 1)
         xv = np.log([p["V"] for p in pts])
         a, _ = np.polyfit(xv, y, 1)
@@ -170,8 +169,15 @@ def figura_escala(linhas):
     fig, ax = plt.subplots(figsize=(3.3, 3.4))
     for (nome, cor, mk) in zip(TEORICA, cores, marcadores):
         pts = [x for x in linhas if x["algoritmo"] == nome]
-        ax.loglog([p["V"] for p in pts], [p["media"] * 1000 for p in pts], marker=mk, color=cor,
-                  markersize=4, linewidth=1.5, label=nome)
+        medias = np.array([p["media"] * 1000 for p in pts])
+        erros = [medias - np.array([max(p["ic_inf"], 1e-9) * 1000 for p in pts]),
+                 np.array([p["ic_sup"] * 1000 for p in pts]) - medias]
+        ax.errorbar([p["V"] for p in pts], medias, yerr=erros, marker=mk, color=cor,
+                    markersize=4, linewidth=1.5, elinewidth=0.8, capsize=2, label=nome)
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    todas = [p["media"] * 1000 for p in linhas]
+    ax.set_ylim(min(todas) / 3, max(todas) * 3)  # ICs com limite inferior <= 0 ficam cortados
     vs = sorted({p["V"] for p in linhas})
     marcas = [vs[0], vs[1], vs[3], vs[-1]]  # aproximadamente equidistantes em log
     ax.set_xticks(marcas, [str(v) for v in marcas])
@@ -179,8 +185,8 @@ def figura_escala(linhas):
     ax.set_xlabel("vértices $V$ do subgrafo (log)")
     ax.set_ylabel("tempo médio (ms, log)")
     ax.legend(fontsize=6, ncol=3, loc="upper center", bbox_to_anchor=(0.5, -0.2))
-    fig.savefig(os.path.join(FIGURAS, "escala.pdf"))
-    plt.close(fig)
+    ax.set_title("barras: IC 95% de cada ponto", fontsize=7, color=TINTA_2)
+    salvar_figura(fig, "escala")
 
 
 def main():

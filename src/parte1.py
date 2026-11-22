@@ -7,7 +7,7 @@ import os
 import networkx as nx  # usado apenas para o layout da visualização
 
 from . import algoritmos as alg
-from .comum import (AZUL, DADOS, FIGURAS, TINTA_2, carregar, eixo_graus_log, plt, preparar,
+from .comum import (AZUL, DADOS, TINTA_2, carregar, eixo_graus_log, plt, preparar, salvar_figura,
                     salvar_json)
 from .grafo import Grafo
 from .metricas import metricas_estruturais
@@ -39,8 +39,7 @@ def figura_graus(dist, n):
     b.set_ylabel("$P(k)$ (log)")
     b.set_title("Escala log-log", fontsize=9)
     fig.tight_layout()
-    fig.savefig(os.path.join(FIGURAS, "distribuicao_graus.pdf"))
-    plt.close(fig)
+    salvar_figura(fig, "distribuicao_graus")
 
 
 def figura_visualizacao(g):
@@ -61,9 +60,7 @@ def figura_visualizacao(g):
     nx.draw_networkx_edges(h, pos, ax=ax, width=0.4, edge_color="#9a9890", alpha=0.7)
     nx.draw_networkx_nodes(h, pos, ax=ax, node_size=6, node_color=AZUL, linewidths=0)
     ax.set_axis_off()
-    fig.savefig(os.path.join(FIGURAS, "grafo_completo.pdf"))
-    fig.savefig(os.path.join(FIGURAS, "grafo_completo.png"))
-    plt.close(fig)
+    salvar_figura(fig, "grafo_completo")
 
     # zoom: partida 0 na versão dirigida ponderada
     dirigidas = Grafo.de_csv(os.path.join(DADOS, "arestas_dirigidas.csv"), dirigido=True,
@@ -80,8 +77,7 @@ def figura_visualizacao(g):
     nx.draw_networkx_labels(d, posz, ax=ax, labels={v: v.split("_")[1].upper() for v in d},
                             font_size=7, font_color="white")
     ax.set_axis_off()
-    fig.savefig(os.path.join(FIGURAS, "partida0.pdf"))
-    plt.close(fig)
+    salvar_figura(fig, "partida0")
 
 
 def main():

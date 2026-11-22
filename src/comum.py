@@ -48,6 +48,13 @@ def salvar_json(nome, dados):
         json.dump(dados, f, indent=2, ensure_ascii=False, default=str)
 
 
+def salvar_figura(fig, nome):
+    """Salva a figura em PDF vetorial (relatório) e em PNG (README e notebook)."""
+    fig.savefig(os.path.join(FIGURAS, f"{nome}.pdf"))
+    fig.savefig(os.path.join(FIGURAS, f"{nome}.png"))
+    plt.close(fig)
+
+
 def preparar():
     """Cria as pastas de saída e indica se o modo rápido (--rapido) foi pedido."""
     os.makedirs(RESULTADOS, exist_ok=True)

@@ -2,14 +2,13 @@
 
 Uso: python -m src.parte3 [--rapido]"""
 
-import os
 
 import numpy as np
 
 from . import algoritmos as alg
 from . import propriedades as prop
-from .comum import (AQUA, AZUL, FIGURAS, LARANJA, TINTA, TINTA_2, VERMELHO, carregar,
-                    eixo_graus_log, plt, preparar, salvar_json)
+from .comum import (AQUA, AZUL, LARANJA, TINTA, TINTA_2, VERMELHO, carregar,
+                    eixo_graus_log, plt, preparar, salvar_figura, salvar_json)
 
 
 def parte3(g, d, rapido=False):
@@ -70,8 +69,7 @@ def figura_lei_potencia(lp):
     b.set_title("CCDF", fontsize=9)
     eixo_graus_log(b, kc)
     fig.tight_layout()
-    fig.savefig(os.path.join(FIGURAS, "lei_potencia.pdf"))
-    plt.close(fig)
+    salvar_figura(fig, "lei_potencia")
 
 
 def figura_robustez(rob):
@@ -105,8 +103,7 @@ def figura_robustez(rob):
     ]
     fig.legend(handles=handles, loc="lower center", ncol=3, fontsize=7, bbox_to_anchor=(0.5, -0.14))
     fig.tight_layout()
-    fig.savefig(os.path.join(FIGURAS, "robustez.pdf"))
-    plt.close(fig)
+    salvar_figura(fig, "robustez")
 
 
 def main():

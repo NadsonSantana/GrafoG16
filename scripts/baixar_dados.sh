@@ -11,4 +11,5 @@ if [ ! -d "$DESTINO/comm-f2f-Resistance" ]; then
     curl -L "$URL" -o "$DESTINO/comm-f2f-Resistance-network.tar.gz"
     tar xzf "$DESTINO/comm-f2f-Resistance-network.tar.gz" -C "$DESTINO"
 fi
+python3 "$RAIZ/scripts/verificar_dados.py"
 echo "Dados disponíveis em $DESTINO/comm-f2f-Resistance"

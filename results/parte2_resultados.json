@@ -7,9 +7,9 @@
     "vertices_grau_impar": 236
   },
   "euler_por_partida": {
+    "nao_euleriano": 45,
     "circuito": 2,
-    "caminho": 15,
-    "nao_euleriano": 45
+    "caminho": 15
   },
   "pares_alcancaveis": 2870,
   "distancia_media": 2.1858944982578397,

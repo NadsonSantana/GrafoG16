@@ -2,16 +2,16 @@
   \toprule
   Algoritmo & Complexidade & $n$ & Média (ms) & Desvio (ms) & IC 95\% (ms) \\
   \midrule
-  BFS & $O(V+E)$ & 50 & 0,221 & 0,031 & [0,213; 0,230] \\
-  DFS & $O(V+E)$ & 50 & 0,365 & 0,068 & [0,346; 0,384] \\
-  Eulerianidade & $O(V+E)$ & 50 & 0,063 & 0,019 & [0,057; 0,068] \\
-  Dijkstra (todas as fontes) & $O(V(V+E)\log V)$ & 50 & 4,455 & 7,062 & [2,497; 6,412] \\
-  Bellman-Ford (todas as fontes) & $O(V^2 E)$ & 30 & 429,960 & 88,022 & [398,462; 461,458] \\
-  Floyd-Warshall & $O(V^3)$ & 10 & 80,958 & 14,374 & [70,676; 91,241]* \\
-  Tarjan & $O(V+E)$ & 50 & 0,661 & 0,108 & [0,631; 0,691] \\
-  Tarjan (pontes e articulações) & $O(V+E)$ & 50 & 0,744 & 0,101 & [0,716; 0,771] \\
-  Prim & $O(E\log V)$ & 50 & 0,466 & 0,020 & [0,460; 0,471] \\
-  Kruskal & $O(E\log V)$ & 50 & 0,832 & 0,046 & [0,819; 0,845] \\
+  BFS & $O(V+E)$ & 50 & 0,205 & 0,007 & [0,203; 0,207] \\
+  DFS & $O(V+E)$ & 50 & 0,330 & 0,018 & [0,325; 0,335] \\
+  Eulerianidade & $O(V+E)$ & 50 & 0,059 & 0,006 & [0,058; 0,061] \\
+  Dijkstra (todas as fontes) & $O(V(V+E)\log V)$ & 50 & 2,636 & 0,145 & [2,596; 2,677] \\
+  Bellman-Ford (todas as fontes) & $O(V^2 E)$ & 30 & 358,230 & 80,024 & [329,594; 386,866] \\
+  Floyd-Warshall & $O(V^3)$ & 10 & 81,364 & 20,323 & [66,826; 95,902]* \\
+  Tarjan & $O(V+E)$ & 50 & 0,640 & 0,108 & [0,610; 0,670] \\
+  Tarjan (pontes e articulações) & $O(V+E)$ & 50 & 0,749 & 0,153 & [0,707; 0,792] \\
+  Prim & $O(E\log V)$ & 50 & 0,461 & 0,025 & [0,454; 0,468] \\
+  Kruskal & $O(E\log V)$ & 50 & 0,873 & 0,173 & [0,825; 0,921] \\
   \bottomrule
   \multicolumn{6}{l}{\footnotesize * IC com distribuição t-Student ($n = 10$, 9 graus de liberdade); os demais, com distribuição Normal ($n \geq 30$).} \\
 \end{tabular}

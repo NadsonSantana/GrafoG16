@@ -263,7 +263,7 @@ A Tabela~\ref{tab:tempos} e a Figura~\ref{fig:tempos} comparam a complexidade te
 No grafo completo, os algoritmos lineares levam no máximo \tempoMaxLinear{} ms. Bellman-Ford a partir de todas as fontes é o mais lento (\tempoBF{} ms): cada execução percorre os 1.902 arcos da lista global em cada rodada, inclusive arcos de partidas inalcançáveis a partir da fonte. Floyd-Warshall, mesmo sendo $O(V^3) \approx 9{,}2 \times 10^7$ no pior caso, levou \tempoFW{} ms, \razaoBFFW{} vezes menos que Bellman-Ford, graças à poda de intermediários inalcançáveis. Os desvios relativamente altos se devem ao ruído do sistema operacional em medições de submilissegundos.
 
 \subsubsection{Complexidade observada}
-Um único tamanho de grafo não permite verificar como o tempo \emph{cresce}. Por isso, repetimos as medições em subgrafos formados pela união das $k$ primeiras partidas, com $k \in \{8, 16, \dots, 56, 62\}$ ($V$ de 58 a 451), usando 30 execuções por ponto (10 para Bellman-Ford e Floyd-Warshall). Para cada algoritmo, ajustamos por mínimos quadrados em escala log-log o expoente $b$ de $\text{tempo} \propto f(V,E)^b$, onde $f$ é a função de complexidade teórica, e o expoente $a$ de $\text{tempo} \propto V^a$. Um valor $b \approx 1$ indica que o crescimento observado acompanha a teoria (Tabela~\ref{tab:escala} e Figura~\ref{fig:escala}).
+Um único tamanho de grafo não permite verificar como o tempo \emph{cresce}. Por isso, repetimos as medições em subgrafos formados pela união das $k$ primeiras partidas, com $k \in \{8, 16, \dots, 56, 62\}$ ($V$ de 58 a 451), usando 30 execuções por ponto (10 para Bellman-Ford e Floyd-Warshall). Para cada algoritmo, ajustamos por mínimos quadrados em escala log-log, sobre a mediana das execuções de cada ponto (robusta a execuções atípicas causadas pelo sistema operacional; média, desvio e IC 95\% de cada ponto aparecem na figura), o expoente $b$ de $\text{tempo} \propto f(V,E)^b$, onde $f$ é a função de complexidade teórica, e o expoente $a$ de $\text{tempo} \propto V^a$. Um valor $b \approx 1$ indica que o crescimento observado acompanha a teoria (Tabela~\ref{tab:escala} e Figura~\ref{fig:escala}).
 
 \begin{table}[h]
   \caption{Ajuste da complexidade observada em subgrafos de 58 a 451 vértices.}
@@ -276,7 +276,7 @@ Um único tamanho de grafo não permite verificar como o tempo \emph{cresce}. Po
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.85\linewidth]{../figures/escala.pdf}
-  \caption{Tempo médio em função do número de vértices (escala log-log), por algoritmo. * indica execução a partir de todas as fontes.}
+  \caption{Tempo médio em função do número de vértices (escala log-log), por algoritmo, com barras de IC 95\% em cada ponto. * indica execução a partir de todas as fontes.}
   \label{fig:escala}
   \Description{Linhas em escala log-log do tempo médio contra o número de vértices, uma por algoritmo, todas crescentes.}
 \end{figure}

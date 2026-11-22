@@ -118,7 +118,7 @@ def tab_escala():
                num(x["expoente_v"], 2), num(x["r2_v"], 3)) for nome, x in a.items()]
     salvar("tab_escala.tex", tabular(
         "llrrrr", ["Algoritmo", "$f(V,E)$", "$b$", "$R^2$", "$a$", "$R^2$"], linhas,
-        "* a partir de todas as fontes. $b$: tempo $\\propto f(V,E)^b$; $a$: tempo $\\propto V^a$."))
+        "* a partir de todas as fontes. Ajuste sobre a mediana de cada ponto. $b$: tempo $\\propto f(V,E)^b$; $a$: tempo $\\propto V^a$."))
 
 
 def tab_small_world():

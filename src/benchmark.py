@@ -32,4 +32,6 @@ def medir(funcao, repeticoes, aquecimento=1):
         inicio = time.perf_counter()
         resultado = funcao()
         tempos.append(time.perf_counter() - inicio)
-    return resultado, intervalo_confianca(tempos)
+    estatisticas = intervalo_confianca(tempos)
+    estatisticas["mediana"] = statistics.median(tempos)
+    return resultado, estatisticas
