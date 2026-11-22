@@ -99,7 +99,7 @@ considerando $i = 129$ quando o resultado é 0. A Tabela~\ref{tab:matricula} apl
   \end{adjustbox}
 \end{table}
 
-Como $i = 16 \neq 0$, o grafo atribuído é o \textbf{G16 -- comm-f2f-Resistance}, da categoria \textit{Social networks} da coleção SNAP~\cite{snap}: uma rede ponderada, dirigida e temporal com 451 vértices e 3.126.993 arestas temporais. A regra foi conferida com os dois exemplos da especificação: a matrícula 225216327 resulta em $(30 \times 28) \bmod 129 = 66$ e a matrícula 2025000078, em $(24 \times 79) \bmod 129 = 90$.
+Como $i = 16 \neq 0$, o grafo atribuído é o \textbf{G16 -- comm-f2f-Resistance}, da categoria \textit{Social networks} da coleção SNAP~\cite{snap}: uma rede ponderada, dirigida e temporal com 451 vértices e 3.126.993 arestas temporais. A regra foi conferida com os dois exemplos da especificação: a matrícula 225216327 resulta em $(30 \times 28) \bmod 129 = 66$ e a matrícula 2025000078, em $(24 \times 79) \bmod 129 = 90$. Observamos ainda que o mesmo dataset aparece em quatro entradas da planilha (G16, G37, G103 e G121, esta última sem o número de arestas preenchido); a regra da matrícula aponta para a entrada G16, que é a adotada neste trabalho.
 
 \section{Código e Dados}
 \label{sec:codigo}
@@ -148,7 +148,15 @@ isto é, a fração do tempo em que $u$ olha para $v$. A dimensão temporal deix
 
 \textbf{(2) Remoção do alvo laptop e de auto-laços.} O laptop não é um participante, e \texttt{Pi\_TO\_Pi} é sempre 0. Em média, 6,6\% do tempo é dedicado ao laptop.
 
-\textbf{(3) Limiar de atenção.} A união simples de todas as arestas ao longo do tempo gera um grafo praticamente completo: 2.867 dos 2.870 pares ordenados possíveis ocorrem ao menos uma vez. Isso tornaria a análise trivial. Por isso, mantivemos o arco $u \to v$ somente se $f(u, v) \geq 1/N$, onde $N$ é o número de alvos possíveis de $u$ ($N-1$ colegas mais o laptop). O critério tem interpretação direta: $u$ olha para $v$ \emph{mais do que olharia sob atenção uniforme}.
+\textbf{(3) Limiar de atenção.} A união simples de todas as arestas ao longo do tempo gera um grafo praticamente completo: 2.867 dos 2.870 pares ordenados possíveis ocorrem ao menos uma vez. Isso tornaria a análise trivial. Por isso, mantivemos o arco $u \to v$ somente se $f(u, v) \geq 1/N$, onde $N$ é o número de alvos possíveis de $u$ ($N-1$ colegas mais o laptop). O critério tem interpretação direta: $u$ olha para $v$ \emph{mais do que olharia sob atenção uniforme}. A Figura~\ref{fig:atencao} mostra a distribuição da atenção relativa $f(u,v) \cdot N$ de todos os pares ordenados: o limiar corresponde a $f \cdot N = 1$ e mantém 43\% dos pares. A distribuição não tem um vale natural que separe pares ``ligados'' e ``não ligados'', por isso optamos por um limiar com interpretação clara em vez de um corte ajustado aos dados. A mesma figura mostra que as partidas duram de 16 a 60 minutos, com a maioria entre 30 e 45.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{../figures/atencao.pdf}
+  \caption{Atenção relativa ao uniforme, $f(u,v) \cdot N$, dos 2.870 pares ordenados, com o limiar do tratamento (esquerda), e duração das 62 partidas (direita).}
+  \Description{Histograma assimétrico da atenção relativa, com pico entre 0,4 e 0,6 e cauda até cerca de 5, cortado por uma linha vertical em 1; ao lado, histograma das durações com pico em torno de 40 minutos.}
+  \label{fig:atencao}
+\end{figure}
 
 \textbf{(4) Grafo dirigido $\to$ não-direcionado.} A aresta $\{u, v\}$ existe se $u \to v$ ou $v \to u$. Seu peso é a atenção mútua $w = (f(u,v) + f(v,u))/2$, e a distância usada nos algoritmos ponderados é $d = -\ln w > 0$: atenção forte implica distância curta, e a soma de distâncias de um caminho corresponde ao produto das atenções. A versão dirigida foi mantida para o algoritmo de Tarjan.
 
@@ -382,7 +390,15 @@ Geramos, com implementações próprias, grafos Erdős–Rényi ($G(n,m)$)~\cite
   \end{adjustbox}
 \end{table}
 
-Globalmente, \textbf{nenhum dos três modelos descreve o grafo}. Barabási–Albert gera hubs ($k_{max} \approx \kmaxBA$) inexistentes aqui. Erdős–Rényi e Watts–Strogatz produzem redes conexas com caminhos longos e clusterização baixa ou moderada. Localmente, contudo, cada partida se aproxima de um \textbf{Erdős–Rényi denso} $G(n, p)$ com $p \approx 0{,}67$: o modelo por blocos reproduz $L$ e quase toda a clusterização (Tabela~\ref{tab:sw}). O modelo que melhor descreve a rede inteira é, portanto, a união disjunta de grafos aleatórios densos, um caso extremo de modelo de blocos estocástico sem arestas entre blocos.
+Globalmente, \textbf{nenhum dos três modelos descreve o grafo}. Barabási–Albert gera hubs ($k_{max} \approx \kmaxBA$) inexistentes aqui. Erdős–Rényi e Watts–Strogatz produzem redes conexas com caminhos longos e clusterização baixa ou moderada. Localmente, contudo, cada partida se aproxima de um \textbf{Erdős–Rényi denso} $G(n, p)$ com $p \approx 0{,}67$: o modelo por blocos reproduz $L$ e quase toda a clusterização (Tabela~\ref{tab:sw}). O modelo que melhor descreve a rede inteira é, portanto, a união disjunta de grafos aleatórios densos, um caso extremo de modelo de blocos estocástico sem arestas entre blocos. A Figura~\ref{fig:modelos} resume a comparação pela CCDF dos graus. Até $k \approx 6$ a curva observada praticamente coincide com a do Erdős–Rényi, mas é cortada em $k = 7$, o limite imposto pelo tamanho das partidas. O Erdős–Rényi se estende até $k \approx 14$, o Barabási–Albert tem cauda pesada até dezenas de vizinhos e o Watts–Strogatz é estreito demais, concentrado em torno de $k = 4$.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.85\linewidth]{../figures/modelos_ccdf.pdf}
+  \caption{CCDF dos graus do grafo observado e dos modelos clássicos com mesmo $n$ e número de arestas próximo (10 amostras agregadas por modelo).}
+  \Description{Quatro curvas em escala log-log. A curva observada acompanha a do Erdős–Rényi até grau 6 e termina em 7; a do Barabási–Albert decai lentamente até cerca de 80; a do Watts–Strogatz cai abruptamente entre 4 e 7.}
+  \label{fig:modelos}
+\end{figure}
 
 \section{Discussão Crítica}
 \label{sec:discussao}

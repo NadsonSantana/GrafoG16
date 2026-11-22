@@ -16,6 +16,33 @@ Dada a matrícula `M = 224215945`:
 Grafo atribuído: **G16 — [comm-f2f-Resistance](https://snap.stanford.edu/data/comm-f2f-Resistance.html)**
 (redes dinâmicas de interação face a face em 62 partidas do jogo *The Resistance*).
 
+> O mesmo dataset aparece em quatro entradas da planilha ANALISANDO-SNAP-DATASET
+> (G16, G37, G103 e G121). A regra da matrícula aponta para a entrada **G16**, a adotada aqui.
+
+## Checklist da especificação
+
+| Requisito | Onde está |
+|---|---|
+| Cálculo de determinação do grafo | Relatório, Seção 2 (Tabela 1); README, acima |
+| Link para o repositório | Relatório: resumo (1ª página) e Seção 3 |
+| Códigos e scripts | `src/`, `scripts/` |
+| Conjunto de dados tratado | `data/processed/` |
+| README explicando a execução | Este arquivo, "Como executar" |
+| Descrição do grafo original | Relatório, Seção 4 |
+| Tratamento realizado | Relatório, Seção 5 (Tabela de evolução e figura do limiar de atenção); `src/tratamento.py` |
+| Metodologia | Relatório, Seção 6 |
+| Parte I: todas as medidas + tabela "computadas ou não" | Relatório, Seção 7.1 (tabela de métricas com colunas "Computada?" e "Método") |
+| Parte I: visualização do grafo | Relatório, Figuras 1 e 3; `figures/grafo_completo.png` |
+| Parte II: os 8 grupos de algoritmos | Relatório, Seção 7.2; `src/algoritmos.py` |
+| Parte II: complexidade teórica e observada; média, desvio e IC (Z se n ≥ 30, t se n < 30) | Relatório, tabelas de tempos e de escala; `src/benchmark.py`, `src/parte2.py` |
+| Parte III.1: small-world (código próprio), faz sentido?, implicação prática | Relatório, Seção 7.3; `src/propriedades.py` |
+| Parte III.2: lei de potência | Relatório, Seção 7.3 (regressão, CCDF e máxima verossimilhança) |
+| Parte III.3: robustez aleatória e direcionada (boxplot, métricas A a D) | Relatório, Seção 7.3 (figura de robustez) |
+| Parte III.4: descoberta mais interessante | Relatório, Seção 7.3 |
+| Extra: modelos clássicos (ER, BA, WS) | Relatório, Seção 7.3 (tabela e CCDF dos graus) |
+| Discussão crítica e conclusão | Relatório, Seções 8 e 9 |
+| Template WebMedia; PDF com o número da matrícula | `relatorio/main.tex`; `relatorio/224215945.pdf` |
+
 ## Estrutura
 
 ```
@@ -24,6 +51,7 @@ data/processed/        dados tratados (CSV) usados nas análises
   arestas_dirigidas.csv  1.241 arcos u->v (atenção e distância)
   arestas.csv            951 arestas não-direcionadas (atenção e distância)
   partidas.csv           metadados das 62 partidas
+  atencao_pares.csv      atenção f(u, v) de todos os 2.870 pares ordenados, antes do limiar
   etapas_tratamento.json evolução do grafo ao longo do tratamento
 src/
   tratamento.py        dados brutos -> grafo estático tratado
